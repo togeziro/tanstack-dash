@@ -58,3 +58,6 @@ temp
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# OpenCode internal config
+.opencode/

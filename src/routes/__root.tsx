@@ -8,8 +8,7 @@ import { ActiveThemeProvider } from '@/components/themes/active-theme';
 import ThemeProvider from '@/components/themes/theme-provider';
 import { DEFAULT_THEME, THEMES } from '@/components/themes/theme.config';
 
-/// <reference types='vite/client' />
-import appCss from '@/styles/globals.css?url';
+import '@/styles/globals.css';
 
 const META_THEME_COLORS = {
   light: '#ffffff',
@@ -39,7 +38,7 @@ export const Route = createRootRouteWithContext<{
         content: 'Dashboard with TanStack Start and Shadcn'
       }
     ],
-    links: [{ rel: 'stylesheet', href: appCss }]
+
   }),
   loader: async () => {
     const activeTheme = await getActiveTheme();
