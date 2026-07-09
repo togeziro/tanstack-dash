@@ -26,11 +26,11 @@
 - [x] Configure pre-commit to run `oxlint`, `oxfmt --check`, `tsc --noEmit` on staged files
 - [x] Fixed `tsconfig.json` — removed deprecated `baseUrl`, upgraded lib target to `ES2023` to unblock `tsc --noEmit`
 
-### Testing Setup (Not Started)
+### Testing Setup (In Progress)
 
-- [ ] Install and configure Vitest
-- [ ] Install React Testing Library + `@testing-library/jest-dom`
-- [ ] Add `"test": "vitest"` script to `package.json`
+- [x] Install Vitest + `@testing-library` stack (`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`)
+- [x] Add `test`, `test:run`, `test:coverage` scripts to `package.json`
+- [ ] Configure Vitest (`vite.config.ts` test block, setup file, `jsdom` env)
 - [ ] Write unit tests for database schemas and server functions
 - [ ] Add integration/E2E tests for main dashboard user flows (product CRUD, tables)
 

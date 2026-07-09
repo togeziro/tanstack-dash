@@ -161,4 +161,4 @@ Pre-commit hook runs: `oxlint` → `oxfmt --check` → `tsc --noEmit` on every c
 | Technology       | Version | Purpose                            |
 | ---------------- | ------- | ---------------------------------- |
 | react-responsive | v10.0.1 | Media query component              |
-| agents.md        | —       | Dev conventions (see project root) |
+| AGENTS.md        | —       | Dev conventions (see project root) |

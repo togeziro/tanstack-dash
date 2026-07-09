@@ -1,4 +1,4 @@
-# agents.md — TanStack Dashboard
+# AGENTS.md — TanStack Dashboard
 
 ## Quick start
 
