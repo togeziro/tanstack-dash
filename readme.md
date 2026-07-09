@@ -13,9 +13,9 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/Kiranism/tanstack-start-dashboard/stargazers"><img src="https://img.shields.io/github/stars/Kiranism/tanstack-start-dashboard?style=social" alt="GitHub stars" /></a>
-  <a href="https://github.com/Kiranism/tanstack-start-dashboard/network/members"><img src="https://img.shields.io/github/forks/Kiranism/tanstack-start-dashboard?style=social" alt="Forks" /></a>
-  <a href="https://github.com/Kiranism/tanstack-start-dashboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
+  <a href="https://github.com/togeziro/tanstack-dash/stargazers"><img src="https://img.shields.io/github/stars/togeziro/tanstack-dash?style=social" alt="GitHub stars" /></a>
+  <a href="https://github.com/togeziro/tanstack-dash/network/members"><img src="https://img.shields.io/github/forks/togeziro/tanstack-dash?style=social" alt="Forks" /></a>
+  <a href="https://github.com/togeziro/tanstack-dash/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
   <img src="https://img.shields.io/badge/TanStack_Start-1.x-FF4154" alt="TanStack Start" />
   <img src="https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white" alt="Vite" />
 </p>
@@ -28,24 +28,24 @@ It gives you a production-ready **dashboard UI** with charts, tables, forms, and
 
 ### Tech Stack
 
-| Category           | Technology                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| Framework          | [TanStack Start](https://tanstack.com/start)                                                           |
-| Language           | [TypeScript](https://www.typescriptlang.org)                                                           |
-| Build Tool         | [Vite 7](https://vite.dev)                                                                             |
-| Deployment         | [Nitro](https://nitro.build) (Vercel, Cloudflare, Node.js)                                             |
-| Styling            | [Tailwind CSS v4](https://tailwindcss.com)                                                             |
-| Components         | [Shadcn-ui](https://ui.shadcn.com)                                                                     |
-| Routing            | [TanStack Router](https://tanstack.com/router) (file-based, type-safe)                                 |
-| Data Fetching      | [TanStack React Query](https://tanstack.com/query)                                                     |
-| Tables             | [TanStack Table](https://tanstack.com/table)                                                           |
-| Forms              | [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev)                                    |
-| Charts             | [Recharts](https://recharts.org)                                                                       |
-| State Management   | [Zustand](https://zustand-demo.pmnd.rs)                                                                |
-| Database           | [PostgreSQL](https://www.postgresql.org) + [Drizzle ORM](https://orm.drizzle.team) (`postgres` driver) |
-| Command+K          | [kbar](https://kbar.vercel.app/)                                                                       |
-| Themes             | [tweakcn](https://tweakcn.com/)                                                                        |
-| Linter / Formatter | [OxLint](https://oxc.rs/docs/guide/usage/linter) / [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)  |
+| Category           | Technology                                                                                                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Framework          | [TanStack Start](https://tanstack.com/start)                                                                   |
+| Language           | [TypeScript](https://www.typescriptlang.org)                                                                   |
+| Build Tool         | [Vite 7](https://vite.dev)                                                                                     |
+| Deployment         | [Nitro](https://nitro.build) (Vercel, Cloudflare, Node.js)                                                     |
+| Styling            | [Tailwind CSS v4](https://tailwindcss.com)                                                                     |
+| Components         | [Shadcn-ui](https://ui.shadcn.com)                                                                             |
+| Routing            | [TanStack Router](https://tanstack.com/router) (file-based, type-safe)                                         |
+| Data Fetching      | [TanStack React Query](https://tanstack.com/query)                                                             |
+| Tables             | [TanStack Table](https://tanstack.com/table)                                                                   |
+| Forms              | [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev)                                            |
+| Charts             | [Recharts](https://recharts.org)                                                                               |
+| State Management   | [TanStack React Query](https://tanstack.com/query) (server) + [Zustand](https://zustand-demo.pmnd.rs) (client) |
+| Database           | [PostgreSQL](https://www.postgresql.org) + [Drizzle ORM](https://orm.drizzle.team) (`postgres` driver)         |
+| Command+K          | [kbar](https://kbar.vercel.app/)                                                                               |
+| Themes             | [tweakcn](https://tweakcn.com/)                                                                                |
+| Linter / Formatter | [OxLint](https://oxc.rs/docs/guide/usage/linter) / [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)          |
 
 _If you are looking for a Next.js dashboard template, here is the [repo](https://git.new/shadcn-dashboard)._
 
@@ -149,8 +149,8 @@ src/
 Clone the repo:
 
 ```bash
-git clone https://github.com/Kiranism/tanstack-start-dashboard.git
-cd tanstack-start-dashboard
+git clone https://github.com/togeziro/tanstack-dash.git
+cd tanstack-dash
 ```
 
 Install dependencies and run:
@@ -164,8 +164,8 @@ cp env.example.txt .env
 Set up and seed the PostgreSQL database (ensure you have PostgreSQL running locally):
 
 ```bash
-bun run db:push
-bun run db:seed
+bun run db:migrate  # apply database migrations
+bun run db:seed      # seed products, users, and kanban board
 ```
 
 Run the development server:
