@@ -66,21 +66,23 @@ export async function addTask(title: string, description?: string) {
 }
 
 export async function moveTask(taskId: number, columnSlug: string, position: number) {
-  const exists = await db
-    .select({ id: kanbanTasks.id })
+  const existing = await db
+    .select({ id: kanbanTasks.id, column_slug: kanbanTasks.column_slug })
     .from(kanbanTasks)
     .where(eq(kanbanTasks.id, taskId));
-  if (exists.length === 0) {
+  if (existing.length === 0) {
     throw new Error(`Task with id ${taskId} not found`);
   }
 
-  const tasksInColumn = await db
+  const sourceSlug = existing[0].column_slug;
+
+  const tasksInTarget = await db
     .select({ id: kanbanTasks.id, position: kanbanTasks.position })
     .from(kanbanTasks)
     .where(eq(kanbanTasks.column_slug, columnSlug))
     .orderBy(asc(kanbanTasks.position));
 
-  const withoutMoved = tasksInColumn.filter((t) => t.id !== taskId);
+  const withoutMoved = tasksInTarget.filter((t) => t.id !== taskId);
   const clampedPosition = Math.min(position, withoutMoved.length);
 
   await db.transaction(async (tx) => {
@@ -96,6 +98,23 @@ export async function moveTask(taskId: number, columnSlug: string, position: num
           .update(kanbanTasks)
           .set({ position: newPos, updated_at: new Date() })
           .where(eq(kanbanTasks.id, withoutMoved[i].id));
+      }
+    }
+
+    if (sourceSlug !== columnSlug) {
+      const sourceTasks = await tx
+        .select({ id: kanbanTasks.id, position: kanbanTasks.position })
+        .from(kanbanTasks)
+        .where(eq(kanbanTasks.column_slug, sourceSlug))
+        .orderBy(asc(kanbanTasks.position));
+
+      for (let i = 0; i < sourceTasks.length; i++) {
+        if (sourceTasks[i].position !== i) {
+          await tx
+            .update(kanbanTasks)
+            .set({ position: i, updated_at: new Date() })
+            .where(eq(kanbanTasks.id, sourceTasks[i].id));
+        }
       }
     }
   });
