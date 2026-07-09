@@ -80,21 +80,6 @@ const mockNotifications: Notification[] = [
         style: 'primary'
       }
     ]
-  },
-  {
-    id: '5',
-    title: 'New message from Alex',
-    body: 'Alex sent you a message: "Hey, can we sync on the overview dashboard?"',
-    status: 'read',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    actions: [
-      {
-        id: 'open-chat',
-        label: 'Open chat',
-        type: 'redirect',
-        style: 'primary'
-      }
-    ]
   }
 ];
 

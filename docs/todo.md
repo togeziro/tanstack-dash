@@ -42,7 +42,7 @@
 ## Feature Migrations (Zustand to PostgreSQL)
 
 - [x] Migrate Kanban board drag-drop state (columns, tasks, task priority badges) to DB tables and mutations
-- [ ] Migrate Chat messaging (conversations, participants, message bubbles, attachment references) to DB tables and mutations
+- [x] Chat feature removed (decommissioned)
 - [ ] Migrate Notification center (notification triggers, read/unread statuses, bell icon badge count) to DB tables and mutations
 
 ## Authentication & Authorization
