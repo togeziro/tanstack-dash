@@ -6,7 +6,7 @@
 bun install
 cp env.example.txt .env
 bun run db:push    # apply DB schema
-bun run db:seed    # seed 20 products + 50 users
+bun run db:seed    # seed 20 products + 50 users + 4 notifications + kanban
 bun run dev        # http://localhost:3000
 bun run build      # client + server bundles
 bun run start      # run built app from .output/
@@ -38,7 +38,7 @@ bun run start      # run built app from .output/
   - Actual DB connection (`src/lib/db/index.ts`) and data access layers (`src/lib/db/products.ts` / `users.ts`) must never leak to the client.
   - Exposed via `createServerFn()` server functions (`src/features/<name>/api/service.ts`) using dynamic imports inside handlers.
 - **Data fetching**: route `loader` + `useSuspenseQuery`. Query client lives in router context (`src/router.tsx:9`).
-- **State**: React Query (products, users, kanban), Zustand (chat, notifications).
+- **State**: React Query (products, users, kanban, notifications), Zustand (chat).
 
 ## Code conventions
 
