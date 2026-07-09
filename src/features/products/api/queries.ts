@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getProducts, getProductById } from './service';
+import { getProductsFn, getProductByIdFn } from './service';
 import type { Product, ProductFilters } from './types';
 
 export type { Product };
@@ -13,11 +13,11 @@ export const productKeys = {
 export const productsQueryOptions = (filters: ProductFilters) =>
   queryOptions({
     queryKey: productKeys.list(filters),
-    queryFn: () => getProducts(filters)
+    queryFn: () => getProductsFn({ data: filters })
   });
 
 export const productByIdOptions = (id: number) =>
   queryOptions({
     queryKey: productKeys.detail(id),
-    queryFn: () => getProductById(id)
+    queryFn: () => getProductByIdFn({ data: id })
   });

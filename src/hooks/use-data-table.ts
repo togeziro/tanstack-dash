@@ -65,7 +65,14 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   } = props;
 
   const search = useSearch({ strict: false }) as Record<string, unknown>;
-  const navigate = useNavigate();
+  // Called from a generic hook with no route context, so TanStack Router
+  // infers the search param as `never`. Loosen the signature to keep the
+  // search updater (prev: Record<string, unknown>) => Record<string, unknown>.
+  type NavigateWithSearch = (opts: {
+    search?: ((prev: Record<string, unknown>) => Record<string, unknown>) | true;
+    replace?: boolean;
+  }) => void;
+  const navigate = useNavigate() as unknown as NavigateWithSearch;
 
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
     initialState?.rowSelection ?? {}
@@ -167,7 +174,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     (values: Record<string, string | string[] | null>) => {
       void navigate({
         search: (prev: Record<string, unknown>) => {
-          const next = { ...prev, page: 1 };
+          const next: Record<string, unknown> = { ...prev, page: 1 };
           for (const [key, value] of Object.entries(values)) {
             if (value === null || value === undefined) {
               delete next[key];

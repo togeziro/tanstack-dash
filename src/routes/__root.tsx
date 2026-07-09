@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createServerFn } from '@tanstack/react-start';
 
 import { Toaster } from '@/components/ui/sonner';
@@ -37,8 +38,7 @@ export const Route = createRootRouteWithContext<{
         name: 'description',
         content: 'Dashboard with TanStack Start and Shadcn'
       }
-    ],
-
+    ]
   }),
   loader: async () => {
     const activeTheme = await getActiveTheme();
@@ -80,6 +80,7 @@ function RootDocument() {
           </ActiveThemeProvider>
         </ThemeProvider>
         <TanStackRouterDevtools position='bottom-left' />
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition='bottom-right' />
         <Scripts />
       </body>
     </html>

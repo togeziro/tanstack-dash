@@ -1,47 +1,39 @@
 // ============================================================
-// User Service — Data Access Layer
+// User Service — Server-function wrappers
 // ============================================================
-// This is the ONLY file you modify when connecting to your backend.
-// Queries (queries.ts) and components import from here — they never change.
-//
-// Pick your pattern and replace the function bodies below:
-//
-// 1. Server Actions + ORM (Prisma / Drizzle / Supabase)
-//    → Add 'use server' at the top of this file
-//    → Call your ORM directly in each function
-//
-// 2. Route Handlers + ORM
-//    → import { apiClient } from '@/lib/api-client'
-//    → return apiClient<UsersResponse>('/users?...')
-//    → Replace mock calls in route handlers (src/app/api/users/) with ORM
-//
-// 3. BFF — Route Handlers proxy to external backend (Laravel, Go, etc.)
-//    → import { apiClient } from '@/lib/api-client'
-//    → return apiClient<UsersResponse>('/users?...')
-//    → Route handlers proxy requests to your external backend service
-//
-// 4. Direct external API (frontend-only, no Next.js backend)
-//    → const res = await fetch('https://your-api.com/users?...')
-//    → return res.json()
-//
-// Current: Mock (in-memory fake data for demo/prototyping)
-// ============================================================
+// These wrappers expose the server-only data access (PostgreSQL via
+// Drizzle) as TanStack Start server functions. The actual DB module is
+// imported dynamically inside each handler, so the `postgres` driver is
+// never bundled into the client. Response shape (UsersResponse) is
+// preserved so routes & components are untouched.
 
-import { fakeUsers } from '@/constants/mock-api-users';
-import type { UserFilters, UsersResponse, UserMutationPayload } from './types';
+import { createServerFn } from '@tanstack/react-start';
+import type { UserFilters, UserMutationPayload } from './types';
 
-export async function getUsers(filters: UserFilters): Promise<UsersResponse> {
-  return fakeUsers.getUsers(filters);
-}
+export const getUsersFn = createServerFn({ method: 'GET' })
+  .validator((data: unknown) => data as UserFilters)
+  .handler(async ({ data }) => {
+    const { getUsers } = await import('@/lib/db/users');
+    return getUsers(data);
+  });
 
-export async function createUser(data: UserMutationPayload) {
-  return fakeUsers.createUser(data);
-}
+export const createUserFn = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => data as UserMutationPayload)
+  .handler(async ({ data }) => {
+    const { createUser } = await import('@/lib/db/users');
+    return createUser(data);
+  });
 
-export async function updateUser(id: number, data: UserMutationPayload) {
-  return fakeUsers.updateUser(id, data);
-}
+export const updateUserFn = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => data as { id: number; values: UserMutationPayload })
+  .handler(async ({ data: { id, values } }) => {
+    const { updateUser } = await import('@/lib/db/users');
+    return updateUser(id, values);
+  });
 
-export async function deleteUser(id: number) {
-  return fakeUsers.deleteUser(id);
-}
+export const deleteUserFn = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => data as number)
+  .handler(async ({ data: id }) => {
+    const { deleteUser } = await import('@/lib/db/users');
+    return deleteUser(id);
+  });

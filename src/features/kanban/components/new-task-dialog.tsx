@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,17 +14,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { useTaskStore } from '../utils/store';
 
 export default function NewTaskDialog() {
-  const addTask = useTaskStore((state) => state.addTask);
+  const { addTask } = useTaskStore();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const { title, description } = Object.fromEntries(formData);
+    const title = (formData.get('title') as string)?.trim() ?? '';
+    const description = (formData.get('description') as string)?.trim() ?? '';
 
-    if (typeof title !== 'string' || typeof description !== 'string') return;
-    addTask(title, description);
+    if (!title) return;
+    addTask(title, description || undefined);
+    form.reset();
   };
 
   return (
@@ -38,9 +42,15 @@ export default function NewTaskDialog() {
           <DialogTitle>Add New Task</DialogTitle>
           <DialogDescription>What do you want to get done today?</DialogDescription>
         </DialogHeader>
-        <form id='task-form' className='grid gap-4 py-4' onSubmit={handleSubmit}>
+        <form ref={formRef} id='task-form' className='grid gap-4 py-4' onSubmit={handleSubmit}>
           <div className='grid grid-cols-4 items-center gap-4'>
-            <Input id='title' name='title' placeholder='Task title...' className='col-span-4' />
+            <Input
+              id='title'
+              name='title'
+              placeholder='Task title...'
+              className='col-span-4'
+              required
+            />
           </div>
           <div className='grid grid-cols-4 items-center gap-4'>
             <Textarea

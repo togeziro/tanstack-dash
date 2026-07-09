@@ -1,56 +1,46 @@
 // ============================================================
-// Product Service — Data Access Layer
+// Product Service — Server-function wrappers
 // ============================================================
-// This is the ONLY file you modify when connecting to your backend.
-// Queries (queries.ts) and components import from here — they never change.
-//
-// Pick your pattern and replace the function bodies below:
-//
-// 1. Server Actions + ORM (Prisma / Drizzle / Supabase)
-//    → Add 'use server' at the top of this file
-//    → Call your ORM directly in each function
-//
-// 2. Route Handlers + ORM
-//    → import { apiClient } from '@/lib/api-client'
-//    → return apiClient<ProductsResponse>('/products?...')
-//    → Replace mock calls in route handlers (src/app/api/products/) with ORM
-//
-// 3. BFF — Route Handlers proxy to external backend (Laravel, Go, etc.)
-//    → import { apiClient } from '@/lib/api-client'
-//    → return apiClient<ProductsResponse>('/products?...')
-//    → Route handlers proxy requests to your external backend service
-//
-// 4. Direct external API (frontend-only, no Next.js backend)
-//    → const res = await fetch('https://your-api.com/products?...')
-//    → return res.json()
-//
-// Current: Mock (in-memory fake data for demo/prototyping)
-// ============================================================
+// These wrappers expose the server-only data access (PostgreSQL via
+// Drizzle) as TanStack Start server functions. The actual DB module is
+// imported dynamically inside each handler, so the `postgres` driver is
+// never bundled into the client. Response shapes (ProductsResponse /
+// ProductByIdResponse) are preserved so routes & components are untouched.
 
-import { fakeProducts } from '@/constants/mock-api';
-import type {
-  ProductFilters,
-  ProductsResponse,
-  ProductByIdResponse,
-  ProductMutationPayload
-} from './types';
+import { createServerFn } from '@tanstack/react-start';
+import type { ProductFilters, ProductMutationPayload } from './types';
 
-export async function getProducts(filters: ProductFilters): Promise<ProductsResponse> {
-  return fakeProducts.getProducts(filters);
-}
+export const getProductsFn = createServerFn({ method: 'GET' })
+  .validator((data: unknown) => data as ProductFilters)
+  .handler(async ({ data }) => {
+    const { getProducts } = await import('@/lib/db/products');
+    return getProducts(data);
+  });
 
-export async function getProductById(id: number): Promise<ProductByIdResponse> {
-  return fakeProducts.getProductById(id) as Promise<ProductByIdResponse>;
-}
+export const getProductByIdFn = createServerFn({ method: 'GET' })
+  .validator((data: unknown) => data as number)
+  .handler(async ({ data: id }) => {
+    const { getProductById } = await import('@/lib/db/products');
+    return getProductById(id);
+  });
 
-export async function createProduct(data: ProductMutationPayload) {
-  return fakeProducts.createProduct(data);
-}
+export const createProductFn = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => data as ProductMutationPayload)
+  .handler(async ({ data }) => {
+    const { createProduct } = await import('@/lib/db/products');
+    return createProduct(data);
+  });
 
-export async function updateProduct(id: number, data: ProductMutationPayload) {
-  return fakeProducts.updateProduct(id, data);
-}
+export const updateProductFn = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => data as { id: number; values: ProductMutationPayload })
+  .handler(async ({ data: { id, values } }) => {
+    const { updateProduct } = await import('@/lib/db/products');
+    return updateProduct(id, values);
+  });
 
-export async function deleteProduct(id: number) {
-  return fakeProducts.deleteProduct(id);
-}
+export const deleteProductFn = createServerFn({ method: 'POST' })
+  .validator((data: unknown) => data as number)
+  .handler(async ({ data: id }) => {
+    const { deleteProduct } = await import('@/lib/db/products');
+    return deleteProduct(id);
+  });

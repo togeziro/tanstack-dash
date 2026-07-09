@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getUsers } from './service';
+import { getUsersFn } from './service';
 import type { User, UserFilters } from './types';
 
 export type { User };
@@ -13,5 +13,5 @@ export const userKeys = {
 export const usersQueryOptions = (filters: UserFilters) =>
   queryOptions({
     queryKey: userKeys.list(filters),
-    queryFn: () => getUsers(filters)
+    queryFn: () => getUsersFn({ data: filters })
   });

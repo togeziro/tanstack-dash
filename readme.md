@@ -28,23 +28,24 @@ It gives you a production-ready **dashboard UI** with charts, tables, forms, and
 
 ### Tech Stack
 
-| Category           | Technology                                                                                            |
-| ------------------ | ----------------------------------------------------------------------------------------------------- |
-| Framework          | [TanStack Start](https://tanstack.com/start)                                                          |
-| Language           | [TypeScript](https://www.typescriptlang.org)                                                          |
-| Build Tool         | [Vite 7](https://vite.dev)                                                                            |
-| Deployment         | [Nitro](https://nitro.build) (Vercel, Cloudflare, Node.js)                                            |
-| Styling            | [Tailwind CSS v4](https://tailwindcss.com)                                                            |
-| Components         | [Shadcn-ui](https://ui.shadcn.com)                                                                    |
-| Routing            | [TanStack Router](https://tanstack.com/router) (file-based, type-safe)                                |
-| Data Fetching      | [TanStack React Query](https://tanstack.com/query)                                                    |
-| Tables             | [TanStack Table](https://tanstack.com/table)                                                          |
-| Forms              | [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev)                                   |
-| Charts             | [Recharts](https://recharts.org)                                                                      |
-| State Management   | [Zustand](https://zustand-demo.pmnd.rs)                                                               |
-| Command+K          | [kbar](https://kbar.vercel.app/)                                                                      |
-| Themes             | [tweakcn](https://tweakcn.com/)                                                                       |
-| Linter / Formatter | [OxLint](https://oxc.rs/docs/guide/usage/linter) / [Oxfmt](https://oxc.rs/docs/guide/usage/formatter) |
+| Category           | Technology                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| Framework          | [TanStack Start](https://tanstack.com/start)                                                           |
+| Language           | [TypeScript](https://www.typescriptlang.org)                                                           |
+| Build Tool         | [Vite 7](https://vite.dev)                                                                             |
+| Deployment         | [Nitro](https://nitro.build) (Vercel, Cloudflare, Node.js)                                             |
+| Styling            | [Tailwind CSS v4](https://tailwindcss.com)                                                             |
+| Components         | [Shadcn-ui](https://ui.shadcn.com)                                                                     |
+| Routing            | [TanStack Router](https://tanstack.com/router) (file-based, type-safe)                                 |
+| Data Fetching      | [TanStack React Query](https://tanstack.com/query)                                                     |
+| Tables             | [TanStack Table](https://tanstack.com/table)                                                           |
+| Forms              | [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev)                                    |
+| Charts             | [Recharts](https://recharts.org)                                                                       |
+| State Management   | [Zustand](https://zustand-demo.pmnd.rs)                                                                |
+| Database           | [PostgreSQL](https://www.postgresql.org) + [Drizzle ORM](https://orm.drizzle.team) (`postgres` driver) |
+| Command+K          | [kbar](https://kbar.vercel.app/)                                                                       |
+| Themes             | [tweakcn](https://tweakcn.com/)                                                                        |
+| Linter / Formatter | [OxLint](https://oxc.rs/docs/guide/usage/linter) / [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)  |
 
 _If you are looking for a Next.js dashboard template, here is the [repo](https://git.new/shadcn-dashboard)._
 
@@ -68,7 +69,7 @@ _If you are looking for a Next.js dashboard template, here is the [repo](https:/
 
 - **Feature-based folder structure** for scalable projects
 
-- **Kanban board** with drag-n-drop (dnd-kit + Zustand)
+- **Kanban board** with drag-n-drop (dnd-kit + PostgreSQL via Drizzle ORM)
 
 - **Chat interface** with conversation list, message bubbles, and auto-reply demo
 
@@ -80,18 +81,18 @@ _If you are looking for a Next.js dashboard template, here is the [repo](https:/
 
 ## Pages
 
-| Page                                          | Description                                                                                                                |
-| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| [Dashboard Overview](/dashboard/overview)     | Cards with Recharts graphs. Suspense boundaries for independent loading/error per section.                                 |
-| [Product List (Table)](/dashboard/product)    | TanStack Table + React Query (route loader prefetch + client cache) with URL search params for search, filter, pagination. |
-| [Create Product Form](/dashboard/product/new) | TanStack Form + Zod with `useMutation` for create/update. Cache invalidation on success.                                   |
-| [Users (Table)](/dashboard/users)             | Users table with React Query + URL state pattern. Same architecture as Products.                                           |
-| [React Query Demo](/dashboard/react-query)    | Pokemon API showcase demonstrating route loader + `useSuspenseQuery` pattern with client-side cache.                       |
-| [Kanban Board](/dashboard/kanban)             | Drag n Drop task management board with dnd-kit and Zustand. Column sorting, task cards with priority badges.               |
-| [Chat](/dashboard/chat)                       | Messaging UI with conversation list, message bubbles, quick replies, file attachments.                                     |
-| [Notifications](/dashboard/notifications)     | Notification center with bell icon badge, popover preview, and dedicated full page with tabs.                              |
-| [Forms](/dashboard/forms/basic)               | Basic, Multi-step, Sheet/Dialog, and Advanced form patterns with TanStack Form + Zod.                                      |
-| [Not Found](/notfound)                        | Custom 404 page via TanStack Router's `defaultNotFoundComponent`.                                                          |
+| Page                                          | Description                                                                                                                                   |
+| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Dashboard Overview](/dashboard/overview)     | Cards with Recharts graphs. Suspense boundaries for independent loading/error per section.                                                    |
+| [Product List (Table)](/dashboard/product)    | TanStack Table + React Query (route loader prefetch + client cache) with URL search params for search, filter, pagination.                    |
+| [Create Product Form](/dashboard/product/new) | TanStack Form + Zod with `useMutation` for create/update. Cache invalidation on success.                                                      |
+| [Users (Table)](/dashboard/users)             | Users table with React Query + URL state pattern. Same architecture as Products.                                                              |
+| [React Query Demo](/dashboard/react-query)    | Pokemon API showcase demonstrating route loader + `useSuspenseQuery` pattern with client-side cache.                                          |
+| [Kanban Board](/dashboard/kanban)             | Drag n Drop task management board with dnd-kit, PostgreSQL-backed via Drizzle + React Query. Column sorting, task cards with priority badges. |
+| [Chat](/dashboard/chat)                       | Messaging UI with conversation list, message bubbles, quick replies, file attachments.                                                        |
+| [Notifications](/dashboard/notifications)     | Notification center with bell icon badge, popover preview, and dedicated full page with tabs.                                                 |
+| [Forms](/dashboard/forms/basic)               | Basic, Multi-step, Sheet/Dialog, and Advanced form patterns with TanStack Form + Zod.                                                         |
+| [Not Found](/notfound)                        | Custom 404 page via TanStack Router's `defaultNotFoundComponent`.                                                                             |
 
 ## Feature-based Organization
 
@@ -131,9 +132,10 @@ src/
 │   └── forms/                     # Form showcases
 │
 ├── lib/                           # Core utilities (query-client, parsers, etc.)
+│   └── db/                        # Drizzle ORM connection, schema, server-only data access
 ├── hooks/                         # Custom hooks (use-data-table, use-media-query, etc.)
 ├── config/                        # Navigation, infobar, data table config
-├── constants/                     # Mock data
+├── constants/                     # Option constants, seed patterns & faker fallbacks
 ├── styles/                        # Global CSS & theme files
 │   └── themes/                    # Individual theme CSS files (OKLCH)
 └── types/                         # TypeScript types
@@ -155,7 +157,20 @@ Install dependencies and run:
 
 ```bash
 bun install
+bun run prepare     # activate pre-commit hooks
 cp env.example.txt .env
+```
+
+Set up and seed the PostgreSQL database (ensure you have PostgreSQL running locally):
+
+```bash
+bun run db:push
+bun run db:seed
+```
+
+Run the development server:
+
+```bash
 bun run dev
 ```
 

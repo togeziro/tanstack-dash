@@ -1,0 +1,104 @@
+import { asc, eq } from 'drizzle-orm';
+import { db } from './index';
+import { kanbanColumns, kanbanTasks } from './schema/kanban';
+import type { Task } from '@/features/kanban/api/types';
+
+function toTask(row: typeof kanbanTasks.$inferSelect): Task {
+  return {
+    id: String(row.id),
+    title: row.title,
+    priority: row.priority,
+    description: row.description ?? undefined,
+    assignee: row.assignee ?? undefined,
+    dueDate: row.due_date ?? undefined
+  };
+}
+
+export async function getBoard(): Promise<Record<string, Task[]>> {
+  const tasks = await db.select().from(kanbanTasks).orderBy(asc(kanbanTasks.position));
+
+  const grouped: Record<string, Task[]> = {};
+  for (const row of tasks) {
+    const slug = row.column_slug;
+    if (!grouped[slug]) grouped[slug] = [];
+    grouped[slug].push(toTask(row));
+  }
+
+  const allColumns = await db
+    .select({ slug: kanbanColumns.slug })
+    .from(kanbanColumns)
+    .orderBy(asc(kanbanColumns.position));
+
+  for (const col of allColumns) {
+    if (!grouped[col.slug]) grouped[col.slug] = [];
+  }
+
+  return grouped;
+}
+
+export async function addTask(title: string, description?: string) {
+  const tasks = await db
+    .select({ position: kanbanTasks.position })
+    .from(kanbanTasks)
+    .where(eq(kanbanTasks.column_slug, 'backlog'))
+    .orderBy(asc(kanbanTasks.position));
+
+  const nextPosition = tasks.length > 0 ? tasks[tasks.length - 1].position + 1 : 0;
+
+  const [created] = await db
+    .insert(kanbanTasks)
+    .values({
+      column_slug: 'backlog',
+      title,
+      priority: 'medium',
+      description: description ?? null,
+      assignee: null,
+      due_date: null,
+      position: nextPosition
+    })
+    .returning();
+
+  if (!created) {
+    throw new Error('Failed to create task');
+  }
+
+  return toTask(created);
+}
+
+export async function moveTask(taskId: number, columnSlug: string, position: number) {
+  const exists = await db
+    .select({ id: kanbanTasks.id })
+    .from(kanbanTasks)
+    .where(eq(kanbanTasks.id, taskId));
+  if (exists.length === 0) {
+    throw new Error(`Task with id ${taskId} not found`);
+  }
+
+  const tasksInColumn = await db
+    .select({ id: kanbanTasks.id, position: kanbanTasks.position })
+    .from(kanbanTasks)
+    .where(eq(kanbanTasks.column_slug, columnSlug))
+    .orderBy(asc(kanbanTasks.position));
+
+  const withoutMoved = tasksInColumn.filter((t) => t.id !== taskId);
+  const clampedPosition = Math.min(position, withoutMoved.length);
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(kanbanTasks)
+      .set({ column_slug: columnSlug, position: clampedPosition, updated_at: new Date() })
+      .where(eq(kanbanTasks.id, taskId));
+
+    for (let i = 0; i < withoutMoved.length; i++) {
+      const newPos = i < clampedPosition ? i : i + 1;
+      if (withoutMoved[i].position !== newPos) {
+        await tx
+          .update(kanbanTasks)
+          .set({ position: newPos, updated_at: new Date() })
+          .where(eq(kanbanTasks.id, withoutMoved[i].id));
+      }
+    }
+  });
+
+  return { success: true };
+}
