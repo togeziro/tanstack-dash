@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import KBar from '@/components/kbar';
 import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
@@ -7,6 +7,13 @@ import { InfobarProvider } from '@/components/ui/infobar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 export const Route = createFileRoute('/dashboard')({
+  beforeLoad: async () => {
+    const { getSessionFn } = await import('@/lib/auth/server');
+    const { user } = await getSessionFn();
+    if (!user) {
+      throw redirect({ to: '/auth/sign-in' });
+    }
+  },
   head: () => ({
     meta: [
       { title: 'TanStack Dashboard Starter' },
