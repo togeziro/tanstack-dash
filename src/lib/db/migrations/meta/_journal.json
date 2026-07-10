@@ -29,6 +29,13 @@
       "when": 1783646829923,
       "tag": "0003_cheerful_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783648179574,
+      "tag": "0004_flowery_steel_serpent",
+      "breakpoints": true
     }
   ]
 }
