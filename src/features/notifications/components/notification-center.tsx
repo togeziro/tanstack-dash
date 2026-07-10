@@ -5,8 +5,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { NotificationCard } from '@/components/ui/notification-card';
-import { useNotificationStore } from '../utils/store';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
+import { notificationListQueryOptions } from '../api/queries';
+import { markAsReadMutation, markAllAsReadMutation } from '../api/mutations';
 
 const MAX_VISIBLE = 5;
 
@@ -14,14 +16,15 @@ const actionRoutes: Record<string, string> = {
   view: '/dashboard/overview',
   'view-product': '/dashboard/product',
   billing: '/dashboard/overview',
-  open: '/dashboard/kanban',
-  'open-chat': '/dashboard/overview'
+  open: '/dashboard/kanban'
 };
 
 export function NotificationCenter() {
-  const { notifications, markAsRead, markAllAsRead, unreadCount } = useNotificationStore();
+  const { data: notifications = [] } = useQuery(notificationListQueryOptions());
+  const { mutate: markAsRead } = useMutation(markAsReadMutation);
+  const { mutate: markAllAsRead } = useMutation(markAllAsReadMutation);
   const router = useRouter();
-  const count = unreadCount();
+  const count = notifications.filter((n) => n.status === 'unread').length;
   const visibleNotifications = notifications.slice(0, MAX_VISIBLE);
 
   return (
@@ -54,7 +57,7 @@ export function NotificationCenter() {
                 variant='ghost'
                 size='sm'
                 className='text-muted-foreground h-auto px-2 py-1 text-xs'
-                onClick={markAllAsRead}
+                onClick={() => markAllAsRead()}
               >
                 Mark all as read
               </Button>
@@ -79,11 +82,11 @@ export function NotificationCenter() {
                   status={notification.status}
                   createdAt={notification.createdAt}
                   actions={notification.actions}
-                  onMarkAsRead={markAsRead}
+                  onMarkAsRead={(id) => markAsRead(Number(id))}
                   onAction={(notifId, actionId) => {
                     const route = actionRoutes[actionId];
                     if (route) {
-                      markAsRead(notifId);
+                      markAsRead(Number(notifId));
                       router.navigate({ to: route });
                     }
                   }}

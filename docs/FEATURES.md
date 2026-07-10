@@ -6,7 +6,7 @@
 - **Product Management** — CRUD with data table (search, filter, pagination, sort, URL state)
 - **User Management** — Data table with role/status filters
 - **Kanban Board** — Drag-and-drop task management with priority badges, PostgreSQL-backed via Drizzle + React Query
-- **Notification Center** — Bell icon badge, popover preview, full page with tabs (client-side Zustand mock store)
+- **Notification Center** — Bell icon badge, popover preview, full page with tabs, PostgreSQL-backed via Drizzle + React Query
 - **Forms** — Basic, multi-step, sheet/dialog, and advanced patterns with TanStack Form + Zod
 - **Command Palette** — Cmd+K navigation via kbar
 - **Multi-Theme Support** — 10+ themes with light/dark/system switching
@@ -15,6 +15,5 @@
 
 ## Planned
 
-- Notification center migration to PostgreSQL (currently a client-side Zustand mock store)
 - Authentication & RBAC
 - CI/CD pipeline

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { db } from '../src/lib/db';
-import { products, users, kanbanColumns, kanbanTasks } from '../src/lib/db/schema';
+import { products, users, kanbanColumns, kanbanTasks, notifications } from '../src/lib/db/schema';
 
 const PRODUCT_CATEGORIES = [
   'Electronics',
@@ -84,11 +84,37 @@ async function seedKanban() {
   console.log(`Seeded ${columnData.length} columns, ${taskData.length} tasks`);
 }
 
+async function seedNotifications() {
+  await db.delete(notifications);
+
+  const notificationTemplates = [
+    { title: 'New team member joined', body: 'Sarah Connor has joined the Engineering workspace.', actionId: 'view', actionLabel: 'View workspace' },
+    { title: 'New product added', body: 'A new product "Dashboard Pro" has been added to the catalog.', actionId: 'view-product', actionLabel: 'View products' },
+    { title: 'Billing cycle updated', body: 'Your Pro plan has been renewed. Next invoice on April 24, 2026.', actionId: 'billing', actionLabel: 'View billing' },
+    { title: 'Task assigned to you', body: 'You have been assigned "Update dashboard analytics" on the Kanban board.', actionId: 'open', actionLabel: 'Open kanban' },
+    { title: 'Deploy successful', body: 'Production v2.4.1 deployed successfully at 14:32 UTC.', actionId: 'view', actionLabel: 'View deployment' },
+    { title: 'New comment on ticket', body: 'Alex replied to your support ticket #4219.', actionId: 'open', actionLabel: 'View ticket' },
+    { title: 'Performance alert', body: 'API response time exceeded 2s threshold in us-east-1.', actionId: 'view', actionLabel: 'View metrics' },
+    { title: 'Weekly report ready', body: 'Your weekly team analytics report for Jun 29 — Jul 5 is ready.', actionId: 'view', actionLabel: 'View report' }
+  ];
+
+  const rows = notificationTemplates.map((t, i) => ({
+    title: t.title,
+    body: t.body,
+    status: i < 6 ? 'unread' as const : 'read' as const,
+    actions: [{ id: t.actionId, label: t.actionLabel, type: 'redirect' as const, style: 'primary' as const }]
+  }));
+
+  await db.insert(notifications).values(rows);
+  console.log(`Seeded ${rows.length} notifications`);
+}
+
 async function main() {
   faker.seed(42);
   await seedProducts();
   await seedUsers();
   await seedKanban();
+  await seedNotifications();
   console.log('Seed complete');
   process.exit(0);
 }

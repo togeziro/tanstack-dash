@@ -35,7 +35,7 @@ src/
 ## Key Patterns
 
 - **Server functions**: `createServerFn()` with `import()` inside handlers
-- **State management**: React Query for server state, Zustand for client-only state (notification center mock store)
+- **State management**: React Query for all server state (products, users, kanban, notifications)
 - **DB access**: Server-only modules in `src/lib/db/`, never imported by client code
 - **Pre-commit hooks**: simple-git-hooks + lint-staged (oxlint, oxfmt --check, tsc --noEmit)
 - **Validation**: Runtime input validation on all server function endpoints

@@ -33,7 +33,27 @@ All notable changes to this project will be documented in this file.
 - Stale closure in kanban store (dbColumns captured via ref)
 - Optimistic state not clearing on mutation error
 - Null check on addTask database result
+- Input validation in `getProducts`: page/limit clamped to safe ranges, categories filter normalized via `Array.isArray` + enum filtering, replacing `String()` garbage coercion
+- Input validation in `createProduct`/`updateProduct`: `validateCategory()` guard replaces unsafe `as ProductCategory` cast; `validatePrice()` guard prevents null/NaN from reaching DB as `"null"`/`"NaN"` strings
 
 ### Removed
 
 - Chat feature (routes, components, nav entry, notification mock) — decommissioned
+- Dead chat leftovers: `open-chat` actionRoutes in notification center, `chat: IconMessage` icon alias, `IconMessage` import
+- Zustand dependency — last consumer (notification center mock store) replaced with PostgreSQL + React Query
+
+### Added
+
+- Notification Drizzle schema (`notification_status` enum, `notifications` table with JSONB actions)
+- Notification data-access layer (`src/lib/db/notifications.ts`)
+- Notification server functions (`createServerFn`) — `getNotificationsFn`, `markAsReadFn`, `markAllAsReadFn`, `addNotificationFn`, `removeNotificationFn`
+- Notification React Query keys, query options, and mutation options
+- Notification integration tests (7 tests covering CRUD, status updates)
+- Notification seed data (8 entries in `scripts/seed.ts`)
+- DB migration `0003_cheerful_rumiko_fujikawa` (notifications table)
+- `drizzle.config.ts` now uses explicit schema file list (avoids picking up `.test.ts` files)
+
+### Changed
+
+- Notification center components (`notification-center.tsx`, `notifications-page.tsx`): swapped Zustand store for `useQuery` + `useMutation`
+- Deleted `src/features/notifications/utils/store.ts` (Zustand mock store) — no longer needed

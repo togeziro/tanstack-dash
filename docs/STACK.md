@@ -53,8 +53,7 @@
 
 | Technology           | Version  | Purpose                                |
 | -------------------- | -------- | -------------------------------------- |
-| Zustand              | v5.0.12  | Client state (notification center mock store) |
-| TanStack React Query | v5.101.2 | Server state (products, users, kanban) |
+| TanStack React Query | v5.101.2 | Server state (products, users, kanban, notifications) |
 
 ## Tables & Charts
 

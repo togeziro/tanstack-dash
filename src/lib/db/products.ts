@@ -46,6 +46,21 @@ function sortColumn(id: string) {
   }
 }
 
+function validateCategory(category: string): ProductCategory {
+  const value = productCategoryEnum.enumValues.find((c) => c === category);
+  if (!value) {
+    throw new Error(`Invalid product category: "${category}"`);
+  }
+  return value;
+}
+
+function validatePrice(price: unknown): number {
+  if (typeof price !== 'number' || !Number.isFinite(price)) {
+    throw new Error(`Invalid product price: ${price}`);
+  }
+  return price;
+}
+
 function serialize(row: typeof products.$inferSelect) {
   return {
     ...row,
@@ -56,15 +71,15 @@ function serialize(row: typeof products.$inferSelect) {
 }
 
 export async function getProducts(filters: ProductFilters): Promise<ProductsResponse> {
-  const page = filters.page ?? 1;
-  const limit = filters.limit ?? 10;
+  const page = Math.max(1, Math.floor(filters.page ?? 1));
+  const limit = Math.min(100, Math.max(1, Math.floor(filters.limit ?? 10)));
   const offset = (page - 1) * limit;
 
-  const rawCategories = filters.categories ? String(filters.categories) : '';
-  const categories = rawCategories
-    .split(/[.,]/)
-    .map((c) => c.trim())
-    .filter(Boolean) as ProductCategory[];
+  const categories = Array.isArray(filters.categories)
+    ? (filters.categories.filter((c): c is ProductCategory =>
+        productCategoryEnum.enumValues.includes(c as ProductCategory)
+      ) as ProductCategory[])
+    : [];
   const search = filters.search?.trim();
 
   const conditions = [];
@@ -130,8 +145,8 @@ export async function createProduct(data: ProductMutationPayload) {
     .values({
       name: data.name,
       description: data.description,
-      price: String(data.price),
-      category: data.category as ProductCategory
+      price: String(validatePrice(data.price)),
+      category: validateCategory(data.category)
     })
     .returning();
 
@@ -160,8 +175,8 @@ export async function updateProduct(id: number, data: ProductMutationPayload) {
     .set({
       name: data.name,
       description: data.description,
-      price: String(data.price),
-      category: data.category as ProductCategory,
+      price: String(validatePrice(data.price)),
+      category: validateCategory(data.category),
       updated_at: new Date()
     })
     .where(eq(products.id, id))

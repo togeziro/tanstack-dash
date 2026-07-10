@@ -47,8 +47,8 @@
 
 - [x] Migrate Kanban board drag-drop state (columns, tasks, task priority badges) to DB tables and mutations
 - [x] Chat feature removed (decommissioned)
-- [ ] Remove dead chat leftovers after decommission: `open-chat` kbar action routes in `src/features/notifications/components/notification-center.tsx` + `notifications-page.tsx`, and `chat: IconMessage` in `src/components/icons.tsx`
-- [ ] Migrate Notification center (notification triggers, read/unread statuses, bell icon badge count) to DB tables and mutations
+- [x] Remove dead chat leftovers after decommission: `open-chat` kbar action routes in `src/features/notifications/components/notification-center.tsx` + `notifications-page.tsx`, and `chat: IconMessage` in `src/components/icons.tsx`
+- [x] Migrate Notification center (notification triggers, read/unread statuses, bell icon badge count) to DB tables and mutations
 
 ## Authentication & Authorization
 

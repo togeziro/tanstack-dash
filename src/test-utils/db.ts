@@ -8,6 +8,7 @@ import { db } from '@/lib/db';
 import { products } from '@/lib/db/schema/products';
 import { users } from '@/lib/db/schema/users';
 import { kanbanColumns, kanbanTasks } from '@/lib/db/schema/kanban';
+import { notifications } from '@/lib/db/schema/notifications';
 import type { NewProduct } from '@/lib/db/schema/products';
 import type { NewUser } from '@/lib/db/schema/users';
 
@@ -15,6 +16,7 @@ import type { NewUser } from '@/lib/db/schema/users';
 export async function resetDatabase() {
   await db.delete(kanbanTasks);
   await db.delete(kanbanColumns);
+  await db.delete(notifications);
   await db.delete(products);
   await db.delete(users);
 }

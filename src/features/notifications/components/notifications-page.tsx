@@ -4,20 +4,23 @@ import { Button } from '@/components/ui/button';
 import { NotificationCard } from '@/components/ui/notification-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from '@tanstack/react-router';
-import { useNotificationStore } from '../utils/store';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { notificationListQueryOptions } from '../api/queries';
+import { markAsReadMutation, markAllAsReadMutation } from '../api/mutations';
 
 const actionRoutes: Record<string, string> = {
   view: '/dashboard/overview',
   'view-product': '/dashboard/product',
   billing: '/dashboard/overview',
-  open: '/dashboard/kanban',
-  'open-chat': '/dashboard/overview'
+  open: '/dashboard/kanban'
 };
 
 export default function NotificationsPage() {
-  const { notifications, markAsRead, markAllAsRead, unreadCount } = useNotificationStore();
+  const { data: notifications = [] } = useQuery(notificationListQueryOptions());
+  const { mutate: markAsRead } = useMutation(markAsReadMutation);
+  const { mutate: markAllAsRead } = useMutation(markAllAsReadMutation);
   const router = useRouter();
-  const count = unreadCount();
+  const count = notifications.filter((n) => n.status === 'unread').length;
 
   const unreadNotifications = notifications.filter((n) => n.status === 'unread');
   const readNotifications = notifications.filter((n) => n.status === 'read');
@@ -43,11 +46,11 @@ export default function NotificationsPage() {
             status={notification.status}
             createdAt={notification.createdAt}
             actions={notification.actions}
-            onMarkAsRead={markAsRead}
+            onMarkAsRead={(id) => markAsRead(Number(id))}
             onAction={(notifId, actionId) => {
               const route = actionRoutes[actionId];
               if (route) {
-                markAsRead(notifId);
+                markAsRead(Number(notifId));
                 router.navigate({ to: route });
               }
             }}
@@ -63,7 +66,7 @@ export default function NotificationsPage() {
       pageDescription='View and manage all your notifications.'
       pageHeaderAction={
         count > 0 ? (
-          <Button variant='outline' size='sm' onClick={markAllAsRead}>
+          <Button variant='outline' size='sm' onClick={() => markAllAsRead()}>
             Mark all as read
           </Button>
         ) : undefined

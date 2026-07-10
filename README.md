@@ -41,7 +41,7 @@ It gives you a production-ready **dashboard UI** with charts, tables, forms, and
 | Tables             | [TanStack Table](https://tanstack.com/table)                                                                   |
 | Forms              | [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev)                                            |
 | Charts             | [Recharts](https://recharts.org)                                                                               |
-| State Management   | [TanStack React Query](https://tanstack.com/query) (server) + [Zustand](https://zustand-demo.pmnd.rs) (client) |
+| State Management   | [TanStack React Query](https://tanstack.com/query) (server state: products, users, kanban, notifications) |
 | Database           | [PostgreSQL](https://www.postgresql.org) + [Drizzle ORM](https://orm.drizzle.team) (`postgres` driver)         |
 | Command+K          | [kbar](https://kbar.vercel.app/)                                                                               |
 | Themes             | [tweakcn](https://tweakcn.com/)                                                                                |
@@ -71,7 +71,7 @@ _If you are looking for a Next.js dashboard template, here is the [repo](https:/
 
 - **Kanban board** with drag-n-drop (dnd-kit + PostgreSQL via Drizzle ORM)
 
-- **Notification center** with bell icon badge, popover preview, and full page view (client-side Zustand mock store)
+- **Notification center** with bell icon badge, popover preview, and full page view (PostgreSQL-backed via Drizzle + React Query)
 
 - **Command palette** (Cmd+K) for quick navigation
 
@@ -124,7 +124,7 @@ src/
 │   ├── users/                     # User management table (React Query)
 │   ├── react-query-demo/          # React Query demo (Pokemon API)
 │   ├── kanban/                    # Drag-drop task board
-│   ├── notifications/             # Notification center & store
+│   ├── notifications/             # Notification center (React Query + PostgreSQL)
 │   ├── auth/                      # Auth components
 │   └── forms/                     # Form showcases
 │

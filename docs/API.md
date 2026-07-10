@@ -32,3 +32,13 @@ imports to prevent the `postgres` driver from leaking into the client bundle.
 | `getBoardFn` | GET    | —                 | `Record<string, Task[]>` |
 | `addTaskFn`  | POST   | `AddTaskPayload`  | `Task`                   |
 | `moveTaskFn` | POST   | `MoveTaskPayload` | `{ success }`            |
+
+### Notifications
+
+| Function                | Method | Payload                  | Returns                |
+| ----------------------- | ------ | ------------------------ | ---------------------- |
+| `getNotificationsFn`    | GET    | —                        | `NotificationItem[]`   |
+| `markAsReadFn`          | POST   | `{ id: number }`         | `{ success: boolean }` |
+| `markAllAsReadFn`       | POST   | —                        | `{ success: boolean }` |
+| `addNotificationFn`     | POST   | `AddNotificationPayload` | `NotificationItem`     |
+| `removeNotificationFn`  | POST   | `{ id: number }`         | `{ success: boolean }` |
