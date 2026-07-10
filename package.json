@@ -21,10 +21,13 @@
     "db:push": "drizzle-kit push",
     "db:seed": "bun run scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
+    "db:test:create": "bun run scripts/create-test-db.ts",
     "prepare": "simple-git-hooks",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium",
     "lint-staged": "lint-staged"
   },
   "dependencies": {
@@ -115,6 +118,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
+    "@playwright/test": "^1.61.1",
     "@tabler/icons-react": "^3.40.0",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@tanstack/react-router-devtools": "^1.167.0",

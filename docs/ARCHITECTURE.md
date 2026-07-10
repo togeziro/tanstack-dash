@@ -14,6 +14,7 @@ TanStack Start meta-framework with Vite 7, React 19, and Nitro for production bu
 ## Directory Structure
 
 ```
+e2e/                            # Playwright end-to-end tests (helpers, specs, fixtures)
 src/
 ├── routes/                     # File-based routing (TanStack Router)
 │   ├── __root.tsx              # Root layout (providers, theme, HTML shell)
@@ -34,7 +35,8 @@ src/
 ## Key Patterns
 
 - **Server functions**: `createServerFn()` with `import()` inside handlers
-- **State management**: React Query for server state, Zustand for client-only state (chat, notifications)
+- **State management**: React Query for server state, Zustand for client-only state (notification center mock store)
 - **DB access**: Server-only modules in `src/lib/db/`, never imported by client code
 - **Pre-commit hooks**: simple-git-hooks + lint-staged (oxlint, oxfmt --check, tsc --noEmit)
 - **Validation**: Runtime input validation on all server function endpoints
+- **E2E testing**: Playwright tests in `e2e/` auto-start the dev server, run headless Chromium with a single worker (shared DB), and use Radix-aware interaction helpers for dropdown menus

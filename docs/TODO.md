@@ -26,13 +26,17 @@
 - [x] Configure pre-commit to run `oxlint`, `oxfmt --check`, `tsc --noEmit` on staged files
 - [x] Fixed `tsconfig.json` — removed deprecated `baseUrl`, upgraded lib target to `ES2023` to unblock `tsc --noEmit`
 
-### Testing Setup (In Progress)
+### Testing Setup (Completed)
 
 - [x] Install Vitest + `@testing-library` stack (`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`)
 - [x] Add `test`, `test:run`, `test:coverage` scripts to `package.json`
-- [ ] Configure Vitest (`vite.config.ts` test block, setup file, `jsdom` env)
-- [ ] Write unit tests for database schemas and server functions
-- [ ] Add integration/E2E tests for main dashboard user flows (product CRUD, tables)
+- [x] Configure Vitest (`vite.config.ts` test block, `vitest.setup.ts`, dedicated `tanstack_dashboard_test` DB via `test.env`)
+- [x] Add `db:test:create` script (`scripts/create-test-db.ts`) to (re)create the isolated test database
+- [x] Shared DB test helper (`src/test-utils/db.ts`) for truncation/reseed isolation
+- [x] Unit tests for Drizzle schemas (products, users, kanban enums/columns/FKs)
+- [x] Unit tests for Zod form validation (product & user schemas) and the table sorting parser
+- [x] Integration tests for data-access layer (product/user/kanban CRUD, filtering, search, pagination, sort, kanban move ordering) against the test DB
+- [x] Add browser/component E2E tests for main dashboard user flows (product CRUD, tables)
 
 ### DevTools Wiring (Completed)
 
@@ -43,6 +47,7 @@
 
 - [x] Migrate Kanban board drag-drop state (columns, tasks, task priority badges) to DB tables and mutations
 - [x] Chat feature removed (decommissioned)
+- [ ] Remove dead chat leftovers after decommission: `open-chat` kbar action routes in `src/features/notifications/components/notification-center.tsx` + `notifications-page.tsx`, and `chat: IconMessage` in `src/components/icons.tsx`
 - [ ] Migrate Notification center (notification triggers, read/unread statuses, bell icon badge count) to DB tables and mutations
 
 ## Authentication & Authorization

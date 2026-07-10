@@ -6,17 +6,15 @@
 - **Product Management** — CRUD with data table (search, filter, pagination, sort, URL state)
 - **User Management** — Data table with role/status filters
 - **Kanban Board** — Drag-and-drop task management with priority badges, PostgreSQL-backed via Drizzle + React Query
-- **Chat Interface** — Conversation list, message bubbles, quick replies, file attachments
-- **Notification Center** — Bell icon badge, popover preview, full page with tabs
+- **Notification Center** — Bell icon badge, popover preview, full page with tabs (client-side Zustand mock store)
 - **Forms** — Basic, multi-step, sheet/dialog, and advanced patterns with TanStack Form + Zod
 - **Command Palette** — Cmd+K navigation via kbar
 - **Multi-Theme Support** — 10+ themes with light/dark/system switching
 - **Pre-commit Hooks** — oxlint, oxfmt --check, tsc on staged files
+- **Testing** — Vitest + Testing Library unit & integration tests (Drizzle schema, Zod form validation, table sorting parser, product/user/kanban data-access CRUD against a dedicated test database) plus Playwright E2E tests for product CRUD and table sorting flows
 
 ## Planned
 
-- Chat messaging migration to PostgreSQL
-- Notification center migration to PostgreSQL
+- Notification center migration to PostgreSQL (currently a client-side Zustand mock store)
 - Authentication & RBAC
-- Testing (Vitest, React Testing Library)
 - CI/CD pipeline

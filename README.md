@@ -71,11 +71,11 @@ _If you are looking for a Next.js dashboard template, here is the [repo](https:/
 
 - **Kanban board** with drag-n-drop (dnd-kit + PostgreSQL via Drizzle ORM)
 
-- **Chat interface** with conversation list, message bubbles, and auto-reply demo
-
-- **Notification center** with bell icon badge, popover preview, and full page view
+- **Notification center** with bell icon badge, popover preview, and full page view (client-side Zustand mock store)
 
 - **Command palette** (Cmd+K) for quick navigation
+
+- **Testing** — Vitest unit/integration tests + Playwright E2E tests for product CRUD and table sorting
 
 - **Deploy anywhere** — Vercel, Cloudflare, Node.js via Nitro presets
 
@@ -89,7 +89,6 @@ _If you are looking for a Next.js dashboard template, here is the [repo](https:/
 | [Users (Table)](/dashboard/users)             | Users table with React Query + URL state pattern. Same architecture as Products.                                                              |
 | [React Query Demo](/dashboard/react-query)    | Pokemon API showcase demonstrating route loader + `useSuspenseQuery` pattern with client-side cache.                                          |
 | [Kanban Board](/dashboard/kanban)             | Drag n Drop task management board with dnd-kit, PostgreSQL-backed via Drizzle + React Query. Column sorting, task cards with priority badges. |
-| [Chat](/dashboard/chat)                       | Messaging UI with conversation list, message bubbles, quick replies, file attachments.                                                        |
 | [Notifications](/dashboard/notifications)     | Notification center with bell icon badge, popover preview, and dedicated full page with tabs.                                                 |
 | [Forms](/dashboard/forms/basic)               | Basic, Multi-step, Sheet/Dialog, and Advanced form patterns with TanStack Form + Zod.                                                         |
 | [Not Found](/notfound)                        | Custom 404 page via TanStack Router's `defaultNotFoundComponent`.                                                                             |
@@ -109,7 +108,6 @@ src/
 │       ├── users.tsx              # Users table (route loaders + React Query)
 │       ├── react-query.tsx        # React Query demo page
 │       ├── kanban.tsx             # Task board page
-│       ├── chat.tsx               # Messaging page
 │       ├── notifications.tsx      # Notifications page
 │       ├── forms/                 # Form examples
 │       └── elements/              # UI showcase
@@ -126,7 +124,6 @@ src/
 │   ├── users/                     # User management table (React Query)
 │   ├── react-query-demo/          # React Query demo (Pokemon API)
 │   ├── kanban/                    # Drag-drop task board
-│   ├── chat/                      # Messaging (conversations, bubbles, composer)
 │   ├── notifications/             # Notification center & store
 │   ├── auth/                      # Auth components
 │   └── forms/                     # Form showcases
@@ -175,6 +172,13 @@ bun run dev
 ```
 
 You should now be able to access the application at http://localhost:3000.
+
+### Testing
+
+```bash
+bun run test:run       # Vitest unit/integration tests
+bun run e2e            # Playwright E2E tests (auto-starts dev server)
+```
 
 ## Deploy
 

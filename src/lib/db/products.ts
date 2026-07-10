@@ -76,7 +76,7 @@ export async function getProducts(filters: ProductFilters): Promise<ProductsResp
       or(
         ilike(products.name, `%${search}%`),
         ilike(products.description, `%${search}%`),
-        ilike(products.category, `%${search}%`)
+        ilike(sql`${products.category}::text`, `%${search}%`)
       )
     );
   }

@@ -17,6 +17,11 @@ All notable changes to this project will be documented in this file.
 - Form reset and empty-title validation in new task dialog
 - Race condition protection on kanban drag-drop mutations
 - Cleanup of debounce timers on component unmount
+- Testing setup: Vitest + Testing Library unit & integration tests for schemas, form validation, table parser, and product/user/kanban data-access against dedicated test DB
+- `vite.config.ts` test configuration (test block, vitest.setup.ts with test DB env)
+- `scripts/create-test-db.ts` and `src/test-utils/db.ts` helper for test isolation
+- Added test scripts: `test`, `test:run`, `test:coverage`
+- Playwright E2E tests (`e2e/`) for product CRUD (create/update/delete) and table sorting, plus `e2e` and `e2e:install` scripts and `playwright.config.ts` (auto-starts dev server, single worker to avoid DB races)
 
 ### Changed
 
@@ -28,3 +33,7 @@ All notable changes to this project will be documented in this file.
 - Stale closure in kanban store (dbColumns captured via ref)
 - Optimistic state not clearing on mutation error
 - Null check on addTask database result
+
+### Removed
+
+- Chat feature (routes, components, nav entry, notification mock) — decommissioned

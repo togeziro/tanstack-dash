@@ -53,7 +53,7 @@
 
 | Technology           | Version  | Purpose                                |
 | -------------------- | -------- | -------------------------------------- |
-| Zustand              | v5.0.12  | Client state (chat, notifications)     |
+| Zustand              | v5.0.12  | Client state (notification center mock store) |
 | TanStack React Query | v5.101.2 | Server state (products, users, kanban) |
 
 ## Tables & Charts
@@ -131,6 +131,17 @@
 | drizzle-orm | v0.45.2  | Type-safe SQL ORM        |
 | postgres    | v3.4.9   | PostgreSQL driver        |
 | drizzle-kit | v0.31.10 | Schema migrations / push |
+
+## Testing
+
+| Technology           | Version | Purpose                                       |
+| -------------------- | ------- | --------------------------------------------- |
+| Vitest               | v4.1.10  | Unit & integration test runner               |
+| @testing-library/react     | v16.3.2 | React component testing              |
+| @testing-library/jest-dom  | v6.9.1  | DOM-specific matchers               |
+| @testing-library/user-event| v14.6.1 | User interaction simulation         |
+| jsdom                | v29.1.1 | DOM environment for Vitest                   |
+| Playwright           | v1.61.1 | End-to-end browser tests (Chromium)           |
 
 ## Linting & Formatting
 
