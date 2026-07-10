@@ -62,3 +62,9 @@ temp
 
 # OpenCode internal config
 .opencode/
+
+# graphify knowledge graph artifacts (generated)
+graphify-out/
+
+# Machine-installed git hooks (regenerated per-machine by `graphify hook install`)
+.husky/_/
