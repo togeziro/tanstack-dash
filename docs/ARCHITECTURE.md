@@ -40,3 +40,12 @@ src/
 - **Pre-commit hooks**: simple-git-hooks + lint-staged (oxlint, oxfmt --check, tsc --noEmit)
 - **Validation**: Runtime input validation on all server function endpoints
 - **E2E testing**: Playwright tests in `e2e/` auto-start the dev server, run headless Chromium with a single worker (shared DB), and use Radix-aware interaction helpers for dropdown menus
+
+## Authentication Flow
+
+Auth uses JWT stored in HTTP-only cookies with `bcryptjs` password hashing. See [AUTH.md](./AUTH.md) for full details.
+
+1. Sign-in/sign-up server functions validate credentials, create JWT (`jose`), set `auth_token` cookie
+2. `AuthProvider` reads session on mount via `getSession()` server function
+3. Dashboard routes use `beforeLoad` guard — redirects to `/auth/sign-in` if unauthenticated
+4. Sign-out clears the cookie

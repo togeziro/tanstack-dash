@@ -6,6 +6,26 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- JWT cookie-based auth with `bcryptjs` password hashing — server functions (`signInUserFn`, `signUpUserFn`, `getSessionFn`, `signOutUserFn`), `AuthProvider`/`useAuth()` context, `beforeLoad` route protection on `/dashboard`
+- V1-style auth pages — 1/3 + 2/3 split-screen layout for sign-in and sign-up (replaces old placeholder pages)
+- V2-style auth pages — 50/50 branded split-screen with centered card form at `/auth/v2/sign-in` and `/auth/v2/sign-up`
+- Password field + "Remember me" checkbox in login form with `@tanstack/react-form` + Zod
+- Register form with first/last name, email, password + confirm (Zod `.refine()` validation)
+- `password_hash` column added to `users` table (migration `0004_flowery_steel_serpent`)
+- Auth architecture docs — see [docs/AUTH.md](./AUTH.md)
+
+### Fixed
+
+- Empty `AUTH_SECRET` now throws on startup instead of signing tokens with an empty key
+- Auth handler bodies wrapped in try/catch — safe error logging, no stack leaks to client
+- Signup TOCTOU race removed — catches PostgreSQL unique constraint violation instead of pre-check
+- Email now lowercased/trimmed on both signup and signin for case-insensitive login
+- "Remember me" checkbox now controls cookie `maxAge` (1 day unchecked, 30 days checked)
+- `payload.sub` guarded — JWT without `sub` returns null session instead of crashing
+- `serializeUser` types simplified to avoid Drizzle `PgColumn` type leaking into client
+
+### Added
+
 - PostgreSQL database layer with Drizzle ORM (products, users, kanban tables)
 - Server-only data-access modules with dynamic imports
 - Seed script for products (20), users (50), kanban board (4 columns, 10 tasks)

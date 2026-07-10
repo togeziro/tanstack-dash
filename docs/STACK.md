@@ -166,6 +166,13 @@ Pre-commit hook runs: `oxlint` → `oxfmt --check` → `tsc --noEmit` on every c
 | Nitro (package)               | Available for production builds. Remove `nitro/vite` plugin from Vite config in dev mode — conflicts with TanStack Start's SSR middleware |
 | bun                           | Runtime & package manager                                                                                                                 |
 
+## Authentication
+
+| Technology | Version | Purpose                |
+| ---------- | ------- | ---------------------- |
+| bcryptjs   | v3.0.3  | Password hashing       |
+| jose       | v6.2.3  | JWT sign / verify      |
+
 ## Other Utilities
 
 | Technology       | Version | Purpose                            |

@@ -33,6 +33,15 @@ imports to prevent the `postgres` driver from leaking into the client bundle.
 | `addTaskFn`  | POST   | `AddTaskPayload`  | `Task`                   |
 | `moveTaskFn` | POST   | `MoveTaskPayload` | `{ success }`            |
 
+### Auth
+
+| Function         | Method | Payload                                          | Returns                          |
+| ---------------- | ------ | ------------------------------------------------ | -------------------------------- |
+| `signInUserFn`   | POST   | `{ email, password, remember?: boolean }`        | `{ success, user?, message? }`   |
+| `signUpUserFn`   | POST   | `{ email, password, first_name, last_name }`     | `{ success, user?, message? }`   |
+| `getSessionFn`   | GET    | —                                                | `{ user: AuthUser \| null }`     |
+| `signOutUserFn`  | POST   | —                                                | `{ success: true }`              |
+
 ### Notifications
 
 | Function                | Method | Payload                  | Returns                |

@@ -12,8 +12,9 @@
 - **Multi-Theme Support** — 10+ themes with light/dark/system switching
 - **Pre-commit Hooks** — oxlint, oxfmt --check, tsc on staged files
 - **Testing** — Vitest + Testing Library unit & integration tests (Drizzle schema, Zod form validation, table sorting parser, product/user/kanban data-access CRUD against a dedicated test database) plus Playwright E2E tests for product CRUD and table sorting flows
+- **Authentication** — JWT cookie-based auth with sign-in/sign-up, password hashing, session management, and route protection (V1 and V2 login page variants)
+- **Role-Based Access Control (RBAC)** — Auth context with role/permission checks (planned view rendering)
 
 ## Planned
 
-- Authentication & RBAC
 - CI/CD pipeline

@@ -29,9 +29,3 @@ Detailed, current docs live in `docs/`:
 | `docs/TODO.md`       | Project roadmap and progress                              |
 | `docs/CHANGELOG.md`  | Notable changes (Unreleased and released)                 |
 | `docs/PRD.md`        | Product requirements                                      |
-
-## Agent memory
-
-- Before exploring the codebase or investigating a topic, use `agentmemory_memory_recall` and `agentmemory_memory_smart_search` to check for past context
-- After making key decisions, learning something new, or completing a task, use `agentmemory_memory_save` to persist the insight
-- Use `agentmemory_memory_sessions` to review recent work before continuing
