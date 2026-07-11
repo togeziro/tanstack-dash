@@ -1,14 +1,11 @@
 # Dependencies
 node_modules
-.pnp
-.pnp.js
+.bun
 
 # Build outputs
 dist
 build
 .output
-.vercel
-.vinxi
 *.tsbuildinfo
 
 # TanStack Router generated
@@ -39,26 +36,15 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Turbo
-.turbo
-.nx
-
-# Better-T-Stack
-.alchemy
-
 # Testing
 coverage
-.nyc_output
 test-results
 
 # Misc
 *.tgz
 .cache
-tmp
-temp
-
-# clerk configuration (can include secrets)
-/.clerk/
+/tmp/
+/temp/
 
 # OpenCode internal config
 .opencode/
