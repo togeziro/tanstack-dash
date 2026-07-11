@@ -109,3 +109,35 @@ Wired in `src/routes/__root.tsx` wrapping `<Outlet />`:
 
 - `bcryptjs` — password hashing
 - `jose` — JWT sign/verify
+
+## Roadmap
+
+### Phase 5 — RBAC (planned)
+
+User roles and permissions will live in dedicated tables (`roles`, `permissions`,
+`role_permissions`, `user_roles`) and travel as part of the JWT payload on each
+request. Server functions will be gated by a `requirePermission` middleware
+pattern (TanStack `createMiddleware().server(...)`); client UI will hide
+controls via `useAuth().can(perm)`. The existing `users.role` enum
+(`Developer`, `Designer`, ...) will stay as a display label and not be touched.
+
+Migration plan: `0005_rbac_*`, `0006_rbac_seed`, `0007_magic_links`. See
+[TODO.md](./TODO.md) Phase 5 for the checklist.
+
+### Magic link (planned)
+
+Passwordless signin + signup via single-use tokens stored in `magic_link_tokens`
+(plain token, 15-minute TTL, `used_at` / `revoked_at` audit columns,
+`ip_address` + `user_agent` for forensics). Two server endpoints keep the flows
+explicit: `requestMagicLinkFn` (existing users only) and
+`requestSignupMagicLinkFn` (auto-creates a `member`-role user on verify). Email
+transport is a pluggable `EmailTransport` interface — the current default
+console-logs the link in dev and throws in prod until a real transport
+(SMTP/Resend/etc.) is wired.
+
+### Cookie hardening (planned)
+
+Cookie name is planned to migrate from `auth_token` to the `__Host-` prefix to
+bind it to exact origin (defeats subdomain-takeover session fixation). JWT
+payload will carry a `schema_version` claim so future shape changes can force
+re-login without breaking in-flight sessions.
