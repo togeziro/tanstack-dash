@@ -2,7 +2,14 @@ import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+import { nitro } from 'nitro/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+
+// Nitro is only needed for production builds (node/bun server output).
+// In dev, the `nitro/vite` plugin conflicts with TanStack Start's SSR
+// middleware, so we gate it on NODE_ENV === 'production' (set by `vite build`).
+const isProduction = process.env.NODE_ENV === 'production';
+const nitroPlugin = isProduction ? [nitro({ preset: 'bun' })] : [];
 
 export default defineConfig({
   server: {
@@ -10,7 +17,7 @@ export default defineConfig({
     port: 3000,
     allowedHosts: true
   },
-  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact(), ...nitroPlugin],
   test: {
     // Integration tests talk to a dedicated PostgreSQL test database
     // (see scripts/create-test-db.ts). Never point this at the dev DB.
