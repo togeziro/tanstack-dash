@@ -35,12 +35,15 @@ imports to prevent the `postgres` driver from leaking into the client bundle.
 
 ### Auth
 
-| Function        | Method | Payload                                      | Returns                        |
-| --------------- | ------ | -------------------------------------------- | ------------------------------ |
-| `signInUserFn`  | POST   | `{ email, password, remember?: boolean }`    | `{ success, user?, message? }` |
-| `signUpUserFn`  | POST   | `{ email, password, first_name, last_name }` | `{ success, user?, message? }` |
-| `getSessionFn`  | GET    | —                                            | `{ user: AuthUser \| null }`   |
-| `signOutUserFn` | POST   | —                                            | `{ success: true }`            |
+Auth is handled by **Better Auth** — see [AUTH.md](./AUTH.md) for the full API.
+
+| Endpoint      | Methods  | Purpose                         |
+| ------------- | -------- | ------------------------------- |
+| `/api/auth/$` | GET/POST | Better Auth handler (catch-all) |
+
+Client-side helpers: `authClient.signIn.email`, `authClient.signUp.email`, `authClient.signOut`, `authClient.useSession`.
+
+Server-side helpers: `auth.api.getSession`, `auth.api.listUsers` (admin), `auth.api.createUser` (admin).
 
 ### Notifications
 

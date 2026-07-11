@@ -162,7 +162,7 @@ Set up and seed the PostgreSQL database (ensure you have PostgreSQL running loca
 
 ```bash
 bun run db:migrate  # apply database migrations
-bun run db:seed      # seed products, users, and kanban board
+bun run db:seed      # seed products, kanban board, notifications, and a demo admin user
 ```
 
 Run the development server:
@@ -172,6 +172,8 @@ bun run dev
 ```
 
 You should now be able to access the application at http://localhost:3000.
+
+Log in with the seeded demo account: **`admin@example.com`** / **`Password123!`** (Better Auth `admin` role).
 
 ### Testing
 

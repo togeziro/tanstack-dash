@@ -168,10 +168,10 @@ Pre-commit hook runs: `oxlint` → `oxfmt --check` → `tsc --noEmit` on every c
 
 ## Authentication
 
-| Technology | Version | Purpose           |
-| ---------- | ------- | ----------------- |
-| bcryptjs   | v3.0.3  | Password hashing  |
-| jose       | v6.2.3  | JWT sign / verify |
+| Technology                   | Version | Purpose                              |
+| ---------------------------- | ------- | ------------------------------------ |
+| better-auth                  | ^1.6.23 | Full auth system (DB sessions, RBAC) |
+| @better-auth/drizzle-adapter | ^1.2.6  | Drizzle ORM adapter for Better Auth  |
 
 ## Other Utilities
 

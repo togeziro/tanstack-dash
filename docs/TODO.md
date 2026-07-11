@@ -78,9 +78,18 @@
 
 - [x] Add `beforeLoad` to `/dashboard` — check `getSession()`, redirect if unauthenticated
 
-### Phase 5: RBAC (Future)
+### Phase 5: Better Auth Swap (Completed — replaces Phases 1-4)
 
-- [ ] Implement role-based access control in server functions and routing layouts
+- [x] Install `better-auth`, `@better-auth/drizzle-adapter`
+- [x] Generate Better Auth schema tables (user, session, account, verification)
+- [x] Create auth server config with admin plugin + tanstackStartCookies
+- [x] Create auth client, permissions module, API route handler
+- [x] Decommission old JWT auth: delete `server.ts`, `client.tsx`, `bcryptjs`, `jose`
+- [x] Rewrite sign-in/register forms to use `authClient.*` directly
+- [x] Update dashboard `beforeLoad` to use Better Auth session
+- [x] Drop obsolete `users` table + `user_role`/`user_status` enums
+- [x] Rewrite users data-access layer for Better Auth admin API
+- [x] RBAC via Better Auth `admin` plugin — roles, permissions, `createAccessControl`
 
 ## DevOps & Deployment
 

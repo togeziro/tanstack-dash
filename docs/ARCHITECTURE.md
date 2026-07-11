@@ -43,9 +43,11 @@ src/
 
 ## Authentication Flow
 
-Auth uses JWT stored in HTTP-only cookies with `bcryptjs` password hashing. See [AUTH.md](./AUTH.md) for full details.
+Auth uses **Better Auth** (DB-session based) via the `admin` plugin for RBAC. See [AUTH.md](./AUTH.md) for full details.
 
-1. Sign-in/sign-up server functions validate credentials, create JWT (`jose`), set `auth_token` cookie
-2. `AuthProvider` reads session on mount via `getSession()` server function
-3. Dashboard routes use `beforeLoad` guard — redirects to `/auth/sign-in` if unauthenticated
-4. Sign-out clears the cookie
+1. Sign-in/sign-up forms call `authClient.signIn.email` / `authClient.signUp.email` directly
+2. Better Auth manages session cookies via the `tanstackStartCookies` plugin
+3. API handler at `/api/auth/$` handles all Better Auth requests (GET/POST)
+4. Dashboard routes use `beforeLoad` guard — calls `auth.api.getSession({ headers })`, redirects to `/auth/sign-in` if unauthenticated
+5. Sign-out via `authClient.signOut()` clears the session
+6. RBAC is enforced via Better Auth `admin` plugin with `createAccessControl` roles

@@ -8,7 +8,7 @@ Agent-facing quick reference. Full project documentation lives in [`docs/`](./do
 bun install
 cp env.example.txt .env
 bun run db:push    # apply DB schema
-bun run db:seed    # seed 20 products + 50 users + 8 notifications + kanban
+bun run db:seed    # seed 20 products + 1 demo user + 8 notifications + kanban
 bun run dev        # http://localhost:3000
 bun run build      # client + server bundles
 bun run start      # run built app from .output/

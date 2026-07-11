@@ -22,6 +22,7 @@
     "db:seed": "bun run scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
     "db:test:create": "bun run scripts/create-test-db.ts",
+    "postinstall": "bun run scripts/postinstall.js",
     "prepare": "simple-git-hooks",
     "test": "vitest",
     "test:run": "vitest run",

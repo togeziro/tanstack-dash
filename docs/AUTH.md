@@ -2,143 +2,159 @@
 
 ## Overview
 
-JWT-based auth stored in HTTP-only cookies. Passwords hashed with `bcryptjs`. Session validated on every request via server functions.
+Authentication uses **Better Auth** v1, a DB-session-based auth system integrated
+directly with Drizzle ORM and TanStack Start.
 
 ## Key Files
 
-| File                                                  | Purpose                                                                   |
-| ----------------------------------------------------- | ------------------------------------------------------------------------- |
-| `src/lib/auth/server.ts`                              | Server functions: `signInUser`, `signUpUser`, `getSession`, `signOutUser` |
-| `src/lib/auth/client.tsx`                             | `AuthProvider` React context + `useAuth()` hook                           |
-| `src/lib/db/schema/users.ts`                          | Drizzle schema — users table with `password_hash` column                  |
-| `src/routes/auth/sign-in/index.tsx`                   | Route for `/auth/sign-in` (V1-style split-screen)                         |
-| `src/routes/auth/v2/sign-in/index.tsx`                | Alternative route `/auth/v2/sign-in`                                      |
-| `src/routes/auth/v2.tsx`                              | 50/50 branded split-screen layout for V2 auth pages                       |
-| `src/features/auth/components/sign-in-view.tsx`       | V1 split-screen page component                                            |
-| `src/features/auth/components/sign-up-view.tsx`       | V1 split-screen register page                                             |
-| `src/features/auth/components/user-auth-form.tsx`     | Shared login form (email + password + remember me)                        |
-| `src/features/auth/components/register-form.tsx`      | Shared register form (email + password + confirm)                         |
-| `src/features/auth/components/github-auth-button.tsx` | GitHub OAuth button (placeholder)                                         |
-| `src/features/auth/components/interactive-grid.tsx`   | Decorative SVG grid pattern                                               |
+| File                          | Purpose                                        |
+| ----------------------------- | ---------------------------------------------- |
+| `src/lib/auth/auth.ts`        | Auth server config (plugins, callbacks)        |
+| `src/lib/auth/auth-client.ts` | Client-side auth helpers                       |
+| `src/lib/auth/session.ts`     | `getSession()` / `ensureSession()`             |
+| `src/lib/auth/permissions.ts` | RBAC access control with `createAccessControl` |
+| `src/lib/db/auth-schema.ts`   | Drizzle schema for Better Auth tables          |
+| `src/routes/api/auth/$.ts`    | Catch-all API route for Better Auth            |
 
-## Data Flow
+## Auth Tables (Better Auth)
+
+Better Auth owns four tables in the database:
+
+- `user` — email, hashed password, name, role, banned status
+- `session` — session tokens tied to users (server-managed)
+- `account` — OAuth / email account links (supports future social auth)
+- `verification` — email verification codes
+
+These replace the old single `users` table and custom JWT. Role and ban status
+are stored on the `user` table directly, managed through the Better Auth `admin` plugin.
+
+## Flow
 
 ### Sign In
 
-1. User submits email + password + (optional) remember via `@tanstack/react-form` with Zod validation
-2. Client calls `signInUser(email, password, remember)` server function
-3. Server lowercases/trims email, looks up user, compares password with `bcryptjs.compare()`
-4. On success: creates JWT (`jose`), sets `auth_token` HTTP-only cookie (1 day expiry, or 30 days if "remember me" checked), returns user
-5. Client `AuthProvider` updates context, redirects to `/dashboard/overview`
-6. On failure: returns `{ success: false, message }` — form shows toast error
+1. User submits email + password in `user-auth-form.tsx`
+2. Form calls `authClient.signIn.email({ email, password })`
+3. Better Auth validates credentials, creates a session, sets cookies via `tanstackStartCookies` plugin
+4. On success, the client navigates to `/dashboard`
 
 ### Sign Up
 
-1. User submits email + password + confirm password + name
-2. Client calls `signUpUser(...)` server function
-3. Server lowercases/trims email via Zod `.transform()`, hashes password with `bcryptjs.hash()` (cost 12), inserts user
-4. On unique constraint violation: returns "Email already in use" (TOCTOU-safe, no pre-check race)
-5. On success: creates JWT, sets cookie, returns user
-6. Client redirects to `/dashboard/overview`
+1. User submits name + email + password in `register-form.tsx`
+2. Form calls `authClient.signUp.email({ name, email, password })`
+3. Better Auth creates the user record + initial session
+4. On success, the client navigates to `/dashboard`
 
-### Session Validation
+### Session Check (Route Guard)
 
-- `getSession()` server function reads `auth_token` cookie, verifies JWT with `jose`, looks up user by id
-- Called by `AuthProvider` on mount via React Query
-- Called by dashboard `beforeLoad` route guard — redirects to `/auth/sign-in` if invalid
-- Both callers handle errors gracefully — invalid/expired tokens return `{ user: null }`
+Dashboard routes use a `beforeLoad` handler:
 
-### Error Handling
-
-All server functions wrap handler bodies in try/catch:
-
-- Unexpected errors are logged server-side (`console.error`)
-- Client always receives a safe `{ success: false, message }` response (no stack traces)
-- `signUpUserFn` distinguishes unique constraint violations from other errors
-
-## DB Schema
-
-```diff
- users table:
-   id: serial
-   first_name: text
-   last_name: text
-   email: text (unique)
-+  password_hash: text
-   phone: text
-   status: user_status_enum
-   role: user_role_enum
-   created_at: timestamp
-   updated_at: timestamp
+```ts
+beforeLoad: async ({ location }) => {
+  if (location.pathname.startsWith('/dashboard')) {
+    await ensureSession();
+  }
+};
 ```
 
-## Route Layout
+`ensureSession()` calls `auth.api.getSession({ headers })` and redirects to
+`/auth/sign-in` if the session is missing or expired.
 
-| Route              | Component                           | Auth Required               |
-| ------------------ | ----------------------------------- | --------------------------- |
-| `/auth/sign-in`    | V1 split-screen (replaces old page) | No                          |
-| `/auth/sign-up`    | V1 split-screen (replaces old page) | No                          |
-| `/auth/v2/sign-in` | V2 centered card (alternative)      | No                          |
-| `/auth/v2/sign-up` | V2 centered card (alternative)      | No                          |
-| `/dashboard/*`     | All dashboard routes                | Yes — `beforeLoad` redirect |
+### Sign Out
 
-> **Default:** V1 (`/auth/sign-in`) is the primary login page — both the dashboard `beforeLoad` route guard and the `/auth/` index redirect there. V2 is an alternative variant at `/auth/v2/sign-in` with no route wired to it by default.
+The sidebar "Sign out" button calls `authClient.signOut()`, then navigates
+to `/auth/sign-in`.
 
-## Auth Provider
+## RBAC (Role-Based Access Control)
 
-Wired in `src/routes/__root.tsx` wrapping `<Outlet />`:
+Better Auth's `admin` plugin powers all role/permission checks:
 
-```tsx
-<AuthProvider>
-  <Toaster />
-  <Outlet />
-</AuthProvider>
+```ts
+// src/lib/auth/permissions.ts
+const ac = createAccessControl([
+  defaultRole,
+  {
+    role: 'admin'
+    // ...
+  }
+]);
 ```
 
-## V1 vs V2 Login Styles
+Roles are stored on the `user.role` column. Checks are done server-side using
+`auth.api.listUsers`, `auth.api.createUser`, etc. The admin API accepts
+`fetchOptions` (or is called on the server with `headers`) so the request
+propagates the session cookie automatically.
 
-| Aspect        | V1                               | V2                                                                |
-| ------------- | -------------------------------- | ----------------------------------------------------------------- |
-| Layout        | Self-contained 1/3 + 2/3 split   | 50/50 grid via layout.tsx                                         |
-| Brand panel   | Left — icon + "Hello again" text | Right — app name + info cards                                     |
-| Form width    | `max-w-md` (448px)               | `sm:w-[350px]`                                                    |
-| Chrome        | None                             | Top bar (Register link) + bottom bar (copyright + lang)           |
-| Google button | Below form, `variant="outline"`  | Above form with "Or continue with" divider, `variant="secondary"` |
-| Tone          | Playful subtitle                 | Formal "Login to your account"                                    |
+## Configuration
 
-## Dependencies
+Auth config lives in `src/lib/auth/auth.ts`:
 
-- `bcryptjs` — password hashing
-- `jose` — JWT sign/verify
+```ts
+export const auth = betterAuth({
+  // In dev, derive the base URL from the request origin so Caddy-served
+  // hosts (e.g. http://172.17.16.3:8082) pass Better Auth's CSRF origin check.
+  // Production should set BETTER_AUTH_URL instead.
+  baseURL: process.env.BETTER_AUTH_URL
+    ? process.env.BETTER_AUTH_URL
+    : {
+        allowedHosts: ['localhost:*', '127.0.0.1:*', '172.17.16.3:*'],
+        protocol: 'auto'
+      },
+  database: drizzleAdapter(db, { provider: 'pg' }),
+  emailAndPassword: { enabled: true },
+  plugins: [admin(), tanstackStartCookies()]
+});
+```
 
-## Roadmap
+- **Email + password** authentication is enabled
+- **Admin plugin** adds RBAC + user management endpoints
+- **tanstackStartCookies** adapts cookie handling to TanStack Start's `request`/`response` objects
 
-### Phase 5 — RBAC (planned)
+## Demo Credentials
 
-User roles and permissions will live in dedicated tables (`roles`, `permissions`,
-`role_permissions`, `user_roles`) and travel as part of the JWT payload on each
-request. Server functions will be gated by a `requirePermission` middleware
-pattern (TanStack `createMiddleware().server(...)`); client UI will hide
-controls via `useAuth().can(perm)`. The existing `users.role` enum
-(`Developer`, `Designer`, ...) will stay as a display label and not be touched.
+`scripts/seed.ts` seeds a single demo account (idempotent — re-running
+`bun run db:seed` skips it if the email already exists):
 
-Migration plan: `0005_rbac_*`, `0006_rbac_seed`, `0007_magic_links`. See
-[TODO.md](./TODO.md) Phase 5 for the checklist.
+| Email               | Password       | Role  |
+| ------------------- | -------------- | ----- |
+| `admin@example.com` | `Password123!` | admin |
 
-### Magic link (planned)
+Use these to log in at `/auth/sign-in`. The account has the Better Auth
+`admin` role, so all RBAC checks pass.
 
-Passwordless signin + signup via single-use tokens stored in `magic_link_tokens`
-(plain token, 15-minute TTL, `used_at` / `revoked_at` audit columns,
-`ip_address` + `user_agent` for forensics). Two server endpoints keep the flows
-explicit: `requestMagicLinkFn` (existing users only) and
-`requestSignupMagicLinkFn` (auto-creates a `member`-role user on verify). Email
-transport is a pluggable `EmailTransport` interface — the current default
-console-logs the link in dev and throws in prod until a real transport
-(SMTP/Resend/etc.) is wired.
+## TanStack Start Splat Handler
 
-### Cookie hardening (planned)
+Better Auth's endpoints are multi-segment (`/sign-in/email`,
+`/admin/create-user`, …), so they live under a catch-all route
+`src/routes/api/auth/$.ts` (`$` is TanStack Start's splat, not `$$`).
+TanStack Start only invokes a route's `server.handlers` on **exact**
+matches by default, which means splat routes never fire. `node_modules/
+@tanstack/start-server-core/dist/esm/createStartHandler.js` is patched so
+`server.handlers` also run on splat routes. `scripts/postinstall.js`
+re-applies this patch automatically after `bun install`.
 
-Cookie name is planned to migrate from `auth_token` to the `__Host-` prefix to
-bind it to exact origin (defeats subdomain-takeover session fixation). JWT
-payload will carry a `schema_version` claim so future shape changes can force
-re-login without breaking in-flight sessions.
+## Form Components
+
+### `user-auth-form.tsx`
+
+- Renders email + password fields
+- Password field has a show/hide eye toggle (`Icons.eye` / `Icons.eyeOff`), hidden by default
+- On submit: `authClient.signIn.email(...)`
+- On success: navigates to `/dashboard`
+- Displays inline error messages on failure
+
+### `register-form.tsx`
+
+- Renders name + email + password + confirm-password fields
+- Both password fields have independent show/hide eye toggles
+- On submit: `authClient.signUp.email(...)` with combined `name`
+- On success: navigates to `/dashboard`
+- Displays inline error messages on failure
+
+## Migration from Custom JWT
+
+The existing session cookie from Better Auth is opaque (not a JWT). No custom
+token logic or manual hashing is needed — Better Auth manages all of that.
+
+The old `bcryptjs` and `jose` packages have been removed. All user management
+(create, update, delete, list) now goes through the Better Auth admin API via
+`src/lib/db/users.ts`.

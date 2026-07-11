@@ -1,8 +1,34 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **Auth**: Swapped custom JWT (`bcryptjs`, `jose`) for Better Auth.
+  - Added `better-auth` + `@better-auth/drizzle-adapter` deps; removed `bcryptjs`, `jose`, `@types/bcryptjs`.
+  - Generated Better Auth schema tables (`user`, `session`, `account`, `verification`).
+  - New auth server config with `admin` plugin + `tanstackStartCookies`.
+  - New auth client, permissions module, `/api/auth/$` route handler.
+  - Deleted old `src/lib/auth/server.ts` and `src/lib/auth/client.tsx` (AuthProvider/useAuth).
+  - Sign-in/register forms now call `authClient.*` directly.
+  - Dashboard `beforeLoad` uses Better Auth session via `ensureSession`.
+  - Dropped old `users` table + `user_role`/`user_status` enums (migrations 0005–0006).
+  - Users data-access layer rewritten to use Better Auth admin API.
+  - Seed script no longer seeds users.
+  - Password fields on sign-in and register forms now have a show/hide eye toggle.
+
+### Added
+
+- Seeded a demo admin account `admin@example.com` / `Password123!` via `scripts/seed.ts` (`seedUsers`), so login can be tested immediately after `db:seed` (idempotent — skips if the email already exists).
+
+### Fixed
+
+- **Login 404/403** — Better Auth endpoints are multi-segment, so the API handler must be a catch-all splat route (`src/routes/api/auth/$.ts`); patched TanStack Start's `createStartHandler.js` so `server.handlers` fire on splat routes, with `scripts/postinstall.js` re-applying the patch after `bun install`.
+- **Better Auth "Invalid origin" 403** — `baseURL` now uses a dynamic `allowedHosts` + `protocol: 'auto'` config (replaces the hardcoded `http://localhost:3000`) so Caddy-served dev hosts pass the CSRF origin check.
+
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.1.0]
 
 ### Added
 

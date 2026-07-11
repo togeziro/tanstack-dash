@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { db } from '../src/lib/db';
+import { auth } from '../src/lib/auth/auth';
 import { products, kanbanColumns, kanbanTasks, notifications } from '../src/lib/db/schema';
 
 const PRODUCT_CATEGORIES = [
@@ -62,6 +63,27 @@ async function seedKanban() {
   console.log(`Seeded ${columnData.length} columns, ${taskData.length} tasks`);
 }
 
+async function seedUsers() {
+  const demo = {
+    email: 'admin@example.com',
+    name: 'Demo Admin',
+    password: 'Password123!'
+  };
+  try {
+    await (auth.api as any).createUser({
+      body: { email: demo.email, name: demo.name, password: demo.password, role: 'admin' }
+    });
+    console.log(`Seeded demo user ${demo.email}`);
+  } catch (err: any) {
+    const msg = (err?.message ?? '').toLowerCase();
+    if (msg.includes('already exists')) {
+      console.log(`Demo user ${demo.email} already exists (skipped)`);
+    } else {
+      throw err;
+    }
+  }
+}
+
 async function seedNotifications() {
   await db.delete(notifications);
 
@@ -92,6 +114,7 @@ async function main() {
   await seedProducts();
   await seedKanban();
   await seedNotifications();
+  await seedUsers();
   console.log('Seed complete');
   process.exit(0);
 }

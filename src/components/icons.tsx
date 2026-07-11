@@ -33,6 +33,7 @@ import {
   IconDotsVertical,
   IconEdit,
   IconExternalLink,
+  IconEye,
   IconEyeOff,
   IconFile,
   IconFileText,
@@ -105,6 +106,7 @@ export const Icons = {
   dots: IconDots,
   ellipsis: IconDotsVertical,
   externalLink: IconExternalLink,
+  IconEye,
   help: IconHelpCircle,
   info: IconInfoCircle,
   spinner: IconLoader2,
@@ -195,6 +197,7 @@ export const Icons = {
   trendingDown: IconTrendingDown,
   trendingUp: IconTrendingUp,
   eyeOff: IconEyeOff,
+  eye: IconEye,
   adjustments: IconAdjustmentsHorizontal,
 
   // Text formatting

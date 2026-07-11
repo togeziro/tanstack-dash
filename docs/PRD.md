@@ -12,7 +12,7 @@ and PostgreSQL. Targets SaaS apps, internal tools, and admin panels.
 3. **Kanban board** — Drag-and-drop task management with PostgreSQL persistence
 4. **Notification center** — Badge count, preview popover, full page view
 5. **Forms** — Multi-step, validation, file upload patterns with TanStack Form
-6. **Authentication** — Email/password sign-in and sign-up with JWT session management, route protection
+6. **Authentication** — Email/password sign-in and sign-up with Better Auth DB sessions, RBAC, route protection
 7. **Command palette** — Quick navigation (Cmd+K) via kbar
 8. **Multi-theme** — Theme switching with local storage persistence
 
@@ -39,11 +39,6 @@ lives here; per-item task checklists live in [TODO.md](./TODO.md).
 
 ### Next
 
-- **Role-Based Access Control (RBAC)** — many-to-many `users → roles →
-permissions` schema; JWT-embedded permissions; `requirePermission`
-  middleware on every mutating server function; `useAuth().can(perm)` for UI
-  hide/show. The existing `users.role` enum (`Developer`, `Designer`, ...)
-  stays as a display label, untouched.
 - **Magic link auth** — passwordless signin + signup via single-use tokens
   (`magic_link_tokens` table; 15-min TTL; `used_at` / `revoked_at` /
   `ip_address` / `user_agent` audit columns). Two separate server endpoints
@@ -72,5 +67,4 @@ permissions` schema; JWT-embedded permissions; `requirePermission`
 - [TODO.md](./TODO.md) — task-level checklist for items above
 - [FEATURES.md](./FEATURES.md) — what's currently shipped
 - [CHANGELOG.md](./CHANGELOG.md) — time-ordered ship history
-- [AUTH.md](./AUTH.md) — current auth architecture (email + password, JWT
-  cookies, V1 and V2 login variants)
+- [AUTH.md](./AUTH.md) — current auth architecture (Better Auth email + password, DB sessions, RBAC)
