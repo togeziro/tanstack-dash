@@ -139,9 +139,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -199,9 +197,7 @@
         "kanban_columns_slug_unique": {
           "name": "kanban_columns_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -283,12 +279,8 @@
           "name": "kanban_tasks_column_slug_kanban_columns_slug_fk",
           "tableFrom": "kanban_tasks",
           "tableTo": "kanban_columns",
-          "columnsFrom": [
-            "column_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["column_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -377,41 +369,22 @@
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "Developer",
-        "Designer",
-        "Manager",
-        "QA",
-        "DevOps",
-        "Product Owner"
-      ]
+      "values": ["Developer", "Designer", "Manager", "QA", "DevOps", "Product Owner"]
     },
     "public.user_status": {
       "name": "user_status",
       "schema": "public",
-      "values": [
-        "Active",
-        "Inactive",
-        "Invited"
-      ]
+      "values": ["Active", "Inactive", "Invited"]
     },
     "public.kanban_priority": {
       "name": "kanban_priority",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high"
-      ]
+      "values": ["low", "medium", "high"]
     },
     "public.notification_status": {
       "name": "notification_status",
       "schema": "public",
-      "values": [
-        "unread",
-        "read",
-        "archived"
-      ]
+      "values": ["unread", "read", "archived"]
     }
   },
   "schemas": {},

@@ -36,6 +36,20 @@
       "when": 1783648179574,
       "tag": "0004_flowery_steel_serpent",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783794285915,
+      "tag": "0005_tan_catseye",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783794435461,
+      "tag": "0006_warm_sentinel",
+      "breakpoints": true
     }
   ]
 }

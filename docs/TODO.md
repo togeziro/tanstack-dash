@@ -53,6 +53,7 @@
 ## Authentication & Authorization (Documented — see [docs/AUTH.md](./AUTH.md))
 
 ### Phase 1: Foundation (Done)
+
 - [x] Install `bcryptjs` + `jose`
 - [x] Add `password_hash` column to users schema + migration
 - [x] Create auth server functions: `signInUser`, `signUpUser`, `getSession`, `signOutUser`
@@ -60,6 +61,7 @@
 - [x] Wire `AuthProvider` into root layout
 
 ### Phase 2: V1-Style Login/Register (Done)
+
 - [x] Rewrite sign-in view with V1 split-screen layout (1/3 + 2/3)
 - [x] Add password field to `UserAuthForm` with `@tanstack/react-form` + Zod
 - [x] Implement actual submit handler → `signInUser` → redirect to dashboard
@@ -67,14 +69,17 @@
 - [x] Create register form with email + password + confirm
 
 ### Phase 3: V2-Style Login/Register (Done)
+
 - [x] Create `auth/v2/layout.tsx` — 50/50 branded split-screen
 - [x] Create V2 sign-in route with centered card + top/bottom chrome
 - [x] Create V2 sign-up route using V2 layout
 
 ### Phase 4: Route Protection (Done)
+
 - [x] Add `beforeLoad` to `/dashboard` — check `getSession()`, redirect if unauthenticated
 
 ### Phase 5: RBAC (Future)
+
 - [ ] Implement role-based access control in server functions and routing layouts
 
 ## DevOps & Deployment

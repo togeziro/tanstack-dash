@@ -8,7 +8,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { ActiveThemeProvider } from '@/components/themes/active-theme';
 import ThemeProvider from '@/components/themes/theme-provider';
 import { DEFAULT_THEME, THEMES } from '@/components/themes/theme.config';
-import { AuthProvider } from '@/lib/auth/client';
 
 import '@/styles/globals.css';
 
@@ -76,10 +75,8 @@ function RootDocument() {
           enableColorScheme
         >
           <ActiveThemeProvider initialTheme={activeTheme}>
-            <AuthProvider>
-              <Toaster />
-              <Outlet />
-            </AuthProvider>
+            <Toaster />
+            <Outlet />
           </ActiveThemeProvider>
         </ThemeProvider>
         <TanStackRouterDevtools position='bottom-left' />

@@ -10,6 +10,7 @@ import {
 import { navGroups } from '@/config/nav-config';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
+import { authClient } from '@/lib/auth/auth-client';
 import { Link } from '@tanstack/react-router';
 import { useLocation, useRouter } from '@tanstack/react-router';
 import * as React from 'react';
@@ -149,7 +150,12 @@ export default function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await authClient.signOut();
+                    router.navigate({ to: '/auth/sign-in' });
+                  }}
+                >
                   <Icons.logout className='mr-2 h-4 w-4' />
                   Sign out
                 </DropdownMenuItem>

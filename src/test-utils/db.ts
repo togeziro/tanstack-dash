@@ -6,11 +6,9 @@
 // only what the test needs.
 import { db } from '@/lib/db';
 import { products } from '@/lib/db/schema/products';
-import { users } from '@/lib/db/schema/users';
 import { kanbanColumns, kanbanTasks } from '@/lib/db/schema/kanban';
 import { notifications } from '@/lib/db/schema/notifications';
 import type { NewProduct } from '@/lib/db/schema/products';
-import type { NewUser } from '@/lib/db/schema/users';
 
 // Delete in FK order: tasks reference columns, so clear children first.
 export async function resetDatabase() {
@@ -18,7 +16,6 @@ export async function resetDatabase() {
   await db.delete(kanbanColumns);
   await db.delete(notifications);
   await db.delete(products);
-  await db.delete(users);
 }
 
 export function makeProduct(overrides: Partial<NewProduct> = {}): NewProduct {
@@ -36,25 +33,6 @@ export async function seedProducts(rows: Partial<NewProduct>[]) {
   return db
     .insert(products)
     .values(rows.map((r) => makeProduct(r)))
-    .returning();
-}
-
-export function makeUser(overrides: Partial<NewUser> = {}): NewUser {
-  return {
-    first_name: 'Test',
-    last_name: 'User',
-    email: 'test.user@example.com',
-    phone: '555-0100',
-    status: 'Active',
-    role: 'Developer',
-    ...overrides
-  };
-}
-
-export async function seedUsers(rows: Partial<NewUser>[]) {
-  return db
-    .insert(users)
-    .values(rows.map((r) => makeUser(r)))
     .returning();
 }
 

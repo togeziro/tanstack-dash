@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useAppForm } from '@/components/ui/tanstack-form';
-import { useAuth } from '@/lib/auth/client';
+import { authClient } from '@/lib/auth/auth-client';
+import { useRouter } from '@tanstack/react-router';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -17,7 +18,7 @@ const formSchema = z.object({
 
 export default function UserAuthForm() {
   const [loading, startTransition] = useTransition();
-  const { signIn } = useAuth();
+  const router = useRouter();
 
   const form = useAppForm({
     defaultValues: {
@@ -30,9 +31,15 @@ export default function UserAuthForm() {
     },
     onSubmit: ({ value }) => {
       startTransition(async () => {
-        const result = await signIn(value.email, value.password, value.remember);
-        if (!result.success) {
-          toast.error(result.message || 'Sign in failed');
+        const { error } = await authClient.signIn.email({
+          email: value.email,
+          password: value.password,
+          rememberMe: value.remember
+        });
+        if (error) {
+          toast.error(error.message || 'Sign in failed');
+        } else {
+          router.navigate({ to: '/dashboard/overview' });
         }
       });
     }

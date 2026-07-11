@@ -7,29 +7,31 @@
 > ✅ **All decisions locked.** Pre-plan Q&A (10 items) + follow-up open items (12 items)
 > resolved via user answers. No further confirmation needed before coding.
 
-| # | Question | Assumed default |
-|---|----------|-----------------|
-| 1 | Better Auth migration style | **Full swap + decommission all wrappers (no shims)**. Confirmed via context7: Better Auth natively covers `signIn`/`signUp`/`signOut`/`useSession`/`getSession`/`beforeLoad` guard, plus `admin` (RBAC) + `magicLink` plugins. Wrapper server fns and `AuthProvider`/`useAuth()` are **deleted**, not kept as compat shims |
-| 2 | `users.role` enum vs RBAC | **DROP `users.role` entirely** (user choice O8=B); use Better Auth `user.role` as single source of truth. Users-page role filter/form migrates to Better Auth `user` table in P2/P3 |
-| 3 | Schema ownership | **Separate `auth-schema.ts`** merged into `drizzle.config.ts` schema list |
-| 4 | Database | **Postgres 17** stays (no switch) |
-| 5 | cPanel SMTP | username/password, **port 587 STARTTLS**, fixed `MAIL_FROM`, **console in dev / smtp in prod** via `EMAIL_TRANSPORT` env |
-| 6 | Docker image | **`oven/bun:1`** base; Nitro **`bun` preset** (matches bun runtime); **entrypoint runs `db:migrate` then `bun run .output/server/index.mjs`**; **Caddy** reverse proxy; **dockerized `postgres:17`** in compose |
-| 7 | CI/CD | GH Actions: PR = lint+typecheck+test; push `main` = +build+push GHCR; test job uses ephemeral Postgres; VPS pulls via SSH action |
-| 8 | Sentry | **Both frontend + server**; source maps uploaded |
-| 9 | Non-goals | Keep V1+V2 auth pages, Drizzle, Router, React Query, Form; Sentry/public-API/multitenant stay "Later" |
-| 10 | Plan shape | **(a)** single complete plan |
+| #   | Question                    | Assumed default                                                                                                                                                                                                                                                                                                            |
+| --- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Better Auth migration style | **Full swap + decommission all wrappers (no shims)**. Confirmed via context7: Better Auth natively covers `signIn`/`signUp`/`signOut`/`useSession`/`getSession`/`beforeLoad` guard, plus `admin` (RBAC) + `magicLink` plugins. Wrapper server fns and `AuthProvider`/`useAuth()` are **deleted**, not kept as compat shims |
+| 2   | `users.role` enum vs RBAC   | **DROP `users.role` entirely** (user choice O8=B); use Better Auth `user.role` as single source of truth. Users-page role filter/form migrates to Better Auth `user` table in P2/P3                                                                                                                                        |
+| 3   | Schema ownership            | **Separate `auth-schema.ts`** merged into `drizzle.config.ts` schema list                                                                                                                                                                                                                                                  |
+| 4   | Database                    | **Postgres 17** stays (no switch)                                                                                                                                                                                                                                                                                          |
+| 5   | cPanel SMTP                 | username/password, **port 587 STARTTLS**, fixed `MAIL_FROM`, **console in dev / smtp in prod** via `EMAIL_TRANSPORT` env                                                                                                                                                                                                   |
+| 6   | Docker image                | **`oven/bun:1`** base; Nitro **`bun` preset** (matches bun runtime); **entrypoint runs `db:migrate` then `bun run .output/server/index.mjs`**; **Caddy** reverse proxy; **dockerized `postgres:17`** in compose                                                                                                            |
+| 7   | CI/CD                       | GH Actions: PR = lint+typecheck+test; push `main` = +build+push GHCR; test job uses ephemeral Postgres; VPS pulls via SSH action                                                                                                                                                                                           |
+| 8   | Sentry                      | **Both frontend + server**; source maps uploaded                                                                                                                                                                                                                                                                           |
+| 9   | Non-goals                   | Keep V1+V2 auth pages, Drizzle, Router, React Query, Form; Sentry/public-API/multitenant stay "Later"                                                                                                                                                                                                                      |
+| 10  | Plan shape                  | **(a)** single complete plan                                                                                                                                                                                                                                                                                               |
 
 ---
 
 ## Section 1 — Infrastructure & CI/CD Foundation
 
 ### 1.1 Nitro preset — ✅ ALREADY DONE (no action)
+
 - `vite.config.ts:14` already gates `nitro({ preset: 'bun' })` on `NODE_ENV==='production'` so dev keeps TanStack Start SSR (`nitro/vite` plugin conflicts with SSR middleware in dev).
 - `package.json:13` `start` script already runs `bun run .output/server/index.mjs`, matching the `oven/bun:1` base image (which has **no `node`** runtime — see PA-10 entrypoint reconciliation).
 - Nothing to implement here; this line is recorded only to show the gap is closed.
 
 ### 1.2 Docker
+
 - `Dockerfile` (multi-stage, `oven/bun:1`):
   - deps stage: `bun install --frozen-lockfile`
   - build stage: `bun run build`
@@ -43,6 +45,7 @@
 > never the pgbouncer connection (transaction mode breaks multi-statement
 > migrations — see 5.6.6). This supersedes the bare `db:migrate && exec node`
 > snippet that appeared earlier in §1.2.
+
 - `docker-compose.yml` on VPS:
   - `app` service (pulled `ghcr.io/<owner>/<repo>:<tag>`), depends_on `db`, env from `.env`.
   - `db` service (`postgres:17`), named volume, healthcheck.
@@ -54,10 +57,11 @@
   - `test-results/` (Playwright artifacts)
   - `graphify-out/` (knowledge-graph artifacts, not deployable)
   - keep `bun.lock` + `drizzle` migrations; exclude `node_modules`, `.git`.
-  These four dirs are currently present in the working tree and would otherwise
-  bloat the image context / get committed.
+    These four dirs are currently present in the working tree and would otherwise
+    bloat the image context / get committed.
 
 ### 1.3 GitHub Actions (Option A)
+
 - `.github/workflows/ci.yml` (PR + main):
   - `setup-node`/`oven/action-setup-bun` + cache.
   - `lint` (`oxlint`), `typecheck` (`tsc --noEmit`), `test:run` + `e2e` against service-container Postgres (`db:test:create`, `db:migrate`).
@@ -67,6 +71,7 @@
   - `appleboy/ssh-action` → `docker compose pull && docker compose up -d`.
 
 ### 1.4 VPS deploy contract
+
 - VPS only: `docker compose pull` + run migrations via entrypoint + serve.
 - Secrets: `DATABASE_URL`, `AUTH_SECRET`, `MAIL_*` in VPS `.env` (never in image).
 
@@ -75,18 +80,22 @@
 ## Section 2 — Authentication & Security (Better Auth)
 
 ### 2.1 Dependencies
+
 - Add: `better-auth`, `@better-auth/drizzle-adapter`, `@better-auth/cli`.
 - Remove (consolidated — **P3 only**, after the client swap lands): `bcryptjs`, `jose`, `@types/bcryptjs`. See P3 row; do **not** remove during P2 (PA-6).
 
 ### 2.2 Auth schema (Section 1 Q3)
+
 - Generate `src/lib/db/auth-schema.ts` via `@better-auth/cli generate` (tables: `user`, `session`, `account`, `verification`).
 - Register in `drizzle.config.ts` schema list alongside existing schema files.
 
 ### 2.3 Server config
+
 - `src/lib/auth/server.ts`: `betterAuth({ baseURL, secret: AUTH_SECRET, database: drizzleAdapter(db), emailAndPassword: {...}, plugins: [bearer(), openAPI()] })`.
 - Expose typed server client + Better Auth handler.
 
 ### 2.4 Plugins (solves gaps 2, 3)
+
 - `admin` / `organization` plugin → **RBAC** (`role`/`permission` tables); `requirePermission` style guards via Better Auth middleware in server functions.
 - `magicLink` plugin → **token generation + TTL** out of the box.
 
@@ -95,16 +104,17 @@
 Verified against Better Auth docs (context7): every current wrapper is natively covered.
 Delete, do not wrap.
 
-| Current code | Better Auth native replacement |
-|---|---|
-| `signInUserFn` (server fn) | `authClient.signIn.email({ email, password })` |
-| `signUpUserFn` (server fn) | `authClient.signUp.email({ email, password, ... })` |
-| `signOutUserFn` (server fn) | `authClient.signOut()` |
-| `getSessionFn` (server fn) | `authClient.useSession()` (client) / `auth.api.getSession({ headers })` (server) |
-| `AuthProvider` + `useAuth()` context | `authClient.useSession()` — global nanostore-backed hook, no provider needed |
-| Dashboard `beforeLoad` guard | `auth.api.getSession({ headers: ctx.request.headers })` from loader |
+| Current code                         | Better Auth native replacement                                                   |
+| ------------------------------------ | -------------------------------------------------------------------------------- |
+| `signInUserFn` (server fn)           | `authClient.signIn.email({ email, password })`                                   |
+| `signUpUserFn` (server fn)           | `authClient.signUp.email({ email, password, ... })`                              |
+| `signOutUserFn` (server fn)          | `authClient.signOut()`                                                           |
+| `getSessionFn` (server fn)           | `authClient.useSession()` (client) / `auth.api.getSession({ headers })` (server) |
+| `AuthProvider` + `useAuth()` context | `authClient.useSession()` — global nanostore-backed hook, no provider needed     |
+| Dashboard `beforeLoad` guard         | `auth.api.getSession({ headers: ctx.request.headers })` from loader              |
 
 **Decommission (delete entirely):**
+
 - `src/lib/auth/server.ts` (`signInUserFn`, `signUpUserFn`, `getSessionFn`, `signOutUserFn`)
 - `src/lib/auth/client.tsx` (`AuthProvider`, `useAuth()`)
 - `password_hash` column on `users` + migration `000X_drop_users.sql` (drops `users` table, `user_role`, `user_status` — see PA-3/PA-5)
@@ -118,12 +128,14 @@ Delete, do not wrap.
 > `authClient.signOut()` in the same PR (see Phase 4 UI edits).
 
 **New files:**
+
 - `src/lib/auth/auth.ts` — single `betterAuth({...})` server instance + `tanstackStartCookies()` plugin
 - `src/lib/auth/auth-client.ts` — `createAuthClient()` from `better-auth/react`, exporting `signIn`, `signUp`, `signOut`, `useSession`
 - `src/lib/auth/permissions.ts` — `createAccessControl` (`ac`) + roles for `admin` plugin
 - `src/routes/api/auth/$.tsx` — Better Auth catch-all handler route
 
 **UI changes (form internals only, layouts untouched):**
+
 - `UserAuthForm` / V2 sign-in → `authClient.signIn.email({...})`; `useAuth()` reads → `useSession()`
 - `RegisterForm` → `authClient.signUp.email({...})`
 - Dashboard `beforeLoad` → `auth.api.getSession({ headers })`
@@ -153,6 +165,7 @@ TanStack Start — no manual cookie propagation code needed (replaces the hand-r
   `scripts/seed.ts` (`seedUsers` removed; seeded via Better Auth instead).
 
 ### 2.7 Cookie hardening (refined per O10-B / locked decision)
+
 - Better Auth auto-enforces `secure`/`httpOnly`/`sameSite` on production HTTPS.
 - **`__Host-` prefix applies to the `auth_token` cookie ONLY**, gated on
   `NODE_ENV==='production'`. Browsers reject `__Host-` over plain HTTP,
@@ -168,11 +181,13 @@ TanStack Start — no manual cookie propagation code needed (replaces the hand-r
 ## Section 3 — Email Transport (cPanel SMTP via Nodemailer)
 
 ### 3.1 Adapter
+
 - `src/lib/email/transport.ts`: `EmailTransport` interface (matches AUTH.md roadmap).
 - `NodemailerSmtpTransport`: cPanel via `nodemailer` (`host`, `port 587`, `secure:false`, `STARTTLS`, `user`/`pass`, `MAIL_FROM`).
 - `ConsoleTransport`: dev fallback (console-logs magic-link URL).
 
 ### 3.2 Wiring
+
 - `EMAIL_TRANSPORT=console|smtp` env. Prod = `smtp`.
 - Plug `sendVerificationEmail`/`sendMagicLink` from Better Auth magicLink plugin → Nodemailer transport.
 - `.env` additions: `MAIL_HOST`, `MAIL_PORT=587`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM`.
@@ -182,12 +197,14 @@ TanStack Start — no manual cookie propagation code needed (replaces the hand-r
 ## Section 4 — Scalability & Monitoring Roadmap
 
 ### 4.1 Sentry (selected tool)
+
 - Add `@sentry/bun` (server fn capture) + `@sentry/react` (client) + `@sentry/vite-plugin` (source maps).
 - Init in `__root.tsx` (client) and server entry (Node).
 - Upload source maps in `release.yml`.
 - Documented as "Later" milestone in PRD/ARCHITECTURE.
 
 ### 4.2 Docs to update (no over-engineering now)
+
 - `PRD.md` "Later": add Sentry, public API stabilization, multi-tenant (still won't).
 - `ARCHITECTURE.md`: add Better Auth + Docker + CI section.
 - `AUTH.md`: rewrite to Better Auth model; mark RBAC/magic-link as **implemented via plugins**.
@@ -199,15 +216,15 @@ TanStack Start — no manual cookie propagation code needed (replaces the hand-r
 
 ## Phased execution order
 
-| Phase | Work | Output |
-|-------|------|--------|
-| P0 | Infra: Dockerfile, compose, entrypoint (+ `.gitignore`/`.dockerignore` hygiene, §6.8) | Runnable image locally |
-| P1 | CI: `ci.yml` (lint/typecheck/test + test-DB) | Green PR gate |
-| P2 | Better Auth foundation: deps, `auth-schema.ts`, server config, `admin` + `magicLink` plugins, `/api/auth/$` handler | Auth works via Better Auth |
+| Phase  | Work                                                                                                                                                                                                                                                                                                    | Output                        |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| P0     | Infra: Dockerfile, compose, entrypoint (+ `.gitignore`/`.dockerignore` hygiene, §6.8)                                                                                                                                                                                                                   | Runnable image locally        |
+| P1     | CI: `ci.yml` (lint/typecheck/test + test-DB)                                                                                                                                                                                                                                                            | Green PR gate                 |
+| P2     | Better Auth foundation: deps, `auth-schema.ts`, server config, `admin` + `magicLink` plugins, `/api/auth/$` handler                                                                                                                                                                                     | Auth works via Better Auth    |
 | **P3** | **Auth cutover (merged):** decommission `AuthProvider`/`useAuth()`/wrapper server fns + drop `bcryptjs`/`jose`/`password_hash` **AND** drop the entire `users` table (role + status) — see §6.4 P-Auth-Users map. UI forms + sidebar + `dashboard.tsx` `beforeLoad` repoint to `authClient`/`auth.api`. | Full swap + `users` obsoleted |
-| P4 | Email: Nodemailer cPanel adapter + dev console fallback | Magic links send |
-| P5 | Release + deploy: `release.yml`, `deploy.yml`, GHCR, VPS pull | Live on VPS |
-| P6 | Sentry + docs sync | Observability + accurate docs |
+| P4     | Email: Nodemailer cPanel adapter + dev console fallback                                                                                                                                                                                                                                                 | Magic links send              |
+| P5     | Release + deploy: `release.yml`, `deploy.yml`, GHCR, VPS pull                                                                                                                                                                                                                                           | Live on VPS                   |
+| P6     | Sentry + docs sync                                                                                                                                                                                                                                                                                      | Observability + accurate docs |
 
 > **Item 9 (phase-consolidation, applied):** the client cutover (old P3) and the
 > `users`-table migration (§6.4 "P-Auth-Users") are the **same phase** — both
@@ -222,22 +239,23 @@ TanStack Start — no manual cookie propagation code needed (replaces the hand-r
 
 ## ✅ LOCKED decisions (all 12 open items answered)
 
-| ID | Item | Decision |
-|----|------|----------|
-| O1 | cPanel SMTP port | **A** — Port 587 STARTTLS, username/password |
-| O2 | VPS reverse proxy | **A** — Caddy in compose (auto-TLS) |
-| O3 | Production DB location | **A** — Same VPS, dockerized `postgres:17` in compose |
-| O4 | CI → VPS deploy | **A** — `appleboy/ssh-action` (VPS SSH key as repo secret) |
-| O5 | Magic-link audit cols | **A** — Drop bespoke `used_at`/`revoked_at`/`ip_address`/`user_agent`; use Better Auth `verification` table |
-| O6 | `useAuth().can(perm)` | **A** — Adopt Better Auth native API (`checkRolePermission` / `session.user.role`); no shim |
-| O7 | RBAC plugin | **A** — `admin` plugin only (global roles) |
-| O8 | `users` table (role + status) | **B (expanded)** — Drop the **entire `users` table**; Better Auth `user` (with `role` from `admin` plugin) is single source of truth, `banned`/`metadata` replaces `status`. Users-page role **and** status filter/form/columns removed in P-Auth-Users (between P2/P3). See §2.6 + §5.8 for the migration map. |
-| O9 | Existing users migration | **A** — Drop `password_hash` column + wipe users; fresh seed via Better Auth |
-| O10 | Cookie `__Host-` prefix | **B (refined)** — Apply `__Host-` prefix to `auth_token` cookie **only**, gated on `NODE_ENV==='production'`. `active_theme` cookie stays plain (§5.9). Resolves the earlier draft conflict between this line and §2.7 (PA-4). |
-| O11 | Sentry source maps | **A** — Upload source maps in `release.yml` |
-| O12 | JWT `schema_version` claim | **A** — Skip (N/A with Better Auth DB sessions) |
+| ID  | Item                          | Decision                                                                                                                                                                                                                                                                                                        |
+| --- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O1  | cPanel SMTP port              | **A** — Port 587 STARTTLS, username/password                                                                                                                                                                                                                                                                    |
+| O2  | VPS reverse proxy             | **A** — Caddy in compose (auto-TLS)                                                                                                                                                                                                                                                                             |
+| O3  | Production DB location        | **A** — Same VPS, dockerized `postgres:17` in compose                                                                                                                                                                                                                                                           |
+| O4  | CI → VPS deploy               | **A** — `appleboy/ssh-action` (VPS SSH key as repo secret)                                                                                                                                                                                                                                                      |
+| O5  | Magic-link audit cols         | **A** — Drop bespoke `used_at`/`revoked_at`/`ip_address`/`user_agent`; use Better Auth `verification` table                                                                                                                                                                                                     |
+| O6  | `useAuth().can(perm)`         | **A** — Adopt Better Auth native API (`checkRolePermission` / `session.user.role`); no shim                                                                                                                                                                                                                     |
+| O7  | RBAC plugin                   | **A** — `admin` plugin only (global roles)                                                                                                                                                                                                                                                                      |
+| O8  | `users` table (role + status) | **B (expanded)** — Drop the **entire `users` table**; Better Auth `user` (with `role` from `admin` plugin) is single source of truth, `banned`/`metadata` replaces `status`. Users-page role **and** status filter/form/columns removed in P-Auth-Users (between P2/P3). See §2.6 + §5.8 for the migration map. |
+| O9  | Existing users migration      | **A** — Drop `password_hash` column + wipe users; fresh seed via Better Auth                                                                                                                                                                                                                                    |
+| O10 | Cookie `__Host-` prefix       | **B (refined)** — Apply `__Host-` prefix to `auth_token` cookie **only**, gated on `NODE_ENV==='production'`. `active_theme` cookie stays plain (§5.9). Resolves the earlier draft conflict between this line and §2.7 (PA-4).                                                                                  |
+| O11 | Sentry source maps            | **A** — Upload source maps in `release.yml`                                                                                                                                                                                                                                                                     |
+| O12 | JWT `schema_version` claim    | **A** — Skip (N/A with Better Auth DB sessions)                                                                                                                                                                                                                                                                 |
 
 ### Carry-over notes from pre-plan Q&A (assumptions table)
+
 - Q1 full swap + decommission wrappers ✅
 - Q3 separate `auth-schema.ts` merged into `drizzle.config.ts` ✅
 - Q5 SMTP: console in dev / smtp in prod via `EMAIL_TRANSPORT` ✅
@@ -249,6 +267,7 @@ TanStack Start — no manual cookie propagation code needed (replaces the hand-r
 ---
 
 ## Risks / open items (resolved)
+
 - **O8 migration blast radius** — `users.role` is read in `src/lib/db/users.ts`,
   `src/features/users/**` (form, table, schemas, types), `src/routes/dashboard/users.tsx`.
   Dropping it requires re-pointing the Users-page role filter/form to Better Auth's `user`
@@ -270,7 +289,7 @@ _All decisions locked. Ready to execute Phase 0 (Infra & CI)._
 > Section 5 wins (e.g. in-process worker R2-Q14=B, bitnami/pgbouncer
 > R2-Q2=B, dropped global limiter R2-Q6=B, three-devtools R2-Q12=B/R2-Q18=B).
 > §1.1 is already DONE and is not superseded. Sections 1.2–1.4 still
-> stand as the P0/P1 execution spec; Section 5 adds the P-I* hardening
+> stand as the P0/P1 execution spec; Section 5 adds the P-I\* hardening
 > on top.
 
 ## 5.1 Background & TanStack library scan
@@ -282,74 +301,74 @@ process holds its own 10-connection pool → under SSR load this exhausts Postgr
 
 TanStack library scan (`tanstack.com/libraries`) — what to add:
 
-| Library | In repo? | Decision |
-|---|---|---|
-| Router / Query / Table / Form | ✅ | already used |
-| **Pacer** (debounce/throttle/**rate-limit**/queue/batch) | ❌ | ✅ add (client) — **Pacer WINS**; remove overlapping in-repo hooks `src/hooks/use-debounce.tsx` + `src/hooks/use-debounced-callback.tsx` (migrate `use-data-table.ts` to Pacer) |
-| **Virtual** (row virtualization) | ❌ | ✅ add (large tables) |
-| **Devtools** (unified panel) | ❌ | ✅ add — **docs note:** keep BOTH `@tanstack/devtools` (unified) AND the existing separate Router/Query devtools for now; review at P-I4, deprecate later if unified covers all needs |
-| DB (beta) | ❌ | ➖ overlaps React Query; skip |
-| AI (beta) | ❌ | ➖ out of scope |
-| Hotkeys / Intent / Store / CLI / Config / Ranger | ❌ | ➖ not relevant |
+| Library                                                  | In repo? | Decision                                                                                                                                                                              |
+| -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Router / Query / Table / Form                            | ✅       | already used                                                                                                                                                                          |
+| **Pacer** (debounce/throttle/**rate-limit**/queue/batch) | ❌       | ✅ add (client) — **Pacer WINS**; remove overlapping in-repo hooks `src/hooks/use-debounce.tsx` + `src/hooks/use-debounced-callback.tsx` (migrate `use-data-table.ts` to Pacer)       |
+| **Virtual** (row virtualization)                         | ❌       | ✅ add (large tables)                                                                                                                                                                 |
+| **Devtools** (unified panel)                             | ❌       | ✅ add — **docs note:** keep BOTH `@tanstack/devtools` (unified) AND the existing separate Router/Query devtools for now; review at P-I4, deprecate later if unified covers all needs |
+| DB (beta)                                                | ❌       | ➖ overlaps React Query; skip                                                                                                                                                         |
+| AI (beta)                                                | ❌       | ➖ out of scope                                                                                                                                                                       |
+| Hotkeys / Intent / Store / CLI / Config / Ranger         | ❌       | ➖ not relevant                                                                                                                                                                       |
 
 ## 5.2 Locked decisions (all 16 open items answered)
 
-| Q | Item | Decision |
-|---|------|----------|
-| — | Worker placement | **B (revised)** — worker runs INSIDE app process on startup (app entrypoint boots BullMQ Worker); no separate compose service |
-| — | PgBouncer mode | **Transaction pool mode**; app → `pgbouncer:6432`, migrations/seed → direct `postgres:5432` |
-| — | Rate limiting | **`rate-limiter-flexible`** (Redis store) as Nitro `onRequest` middleware + **TanStack Pacer** client-side |
-| — | Redis cache | **Queue + rate-limit only now**; server-side data cache deferred to a later sub-phase |
-| — | TanStack adds | **Pacer + Virtual + Devtools** — Pacer = canonical client debounce/throttle; in-repo `use-debounce`/`use-debounced-callback` hooks to be removed |
-| Q1 | Postgres image | **B** — `postgres:17` (Debian-based) |
-| Q2 | PgBouncer image | **B** (revised) — `bitnami/pgbouncer` image (env/ini config, healthchecks); drop custom Dockerfile |
-| Q3 | PgBouncer sizing | **B** — Conservative: `default_pool_size=10`, `max_client_conn=100` |
-| Q4 | Redis image/persist | **A** — `redis:7-alpine`, **no persistence** (queue + rate-limit only) |
-| Q5 | Caddy TLS | **Cloudflare Tunnel on SEPARATE VM** — points to prod VM IP, SSL auto-terminated by Cloudflare. Caddy on prod VM = plain HTTP proxy (`:80`→`app:3000`), port **published to host** so the tunnel VM can reach it; no certs in compose |
-| Q6 | Rate-limit tiers | **B (revised)** — Auth `10/min`, Server-fn `100/min`; **drop global** limiter (bounded by auth+fn) |
-| Q7 | Rate-limit on Redis down | **A** — **Fail-open** (allow request, log warning) |
-| Q8 | Queue scope | **A** — `email` queue only (magic-link, welcome, password reset) |
-| Q9 | Email job retry | **A** — 3 attempts, exponential backoff `1m → 5m → 30m`, dead-letter on final failure |
-| Q10 | Worker concurrency | **A** — 1 worker process, `concurrency=5` |
-| Q11 | Virtual target tables | **A** — Products + Users tables |
-| Q12 | Devtools scope | **B** — **Keep both** `@tanstack/devtools` (unified) AND existing Router/Query devtools in `__root.tsx`; review at P-I4 (docs note) |
-| Q13 | Pacer primitives | **A** — throttle + debounce + rate-limit |
-| Q14 | Dev-mode fallback | **A** — Detect `REDIS_URL`/`DATABASE_URL_DIRECT` presence; missing = rate-limit no-op + queue disabled + connect direct to Postgres |
-| Q15 | Sentry / observability | **A** — Stay "Later"; not bundled with infra hardening |
-| Q16 | Docs sync | **A** — Update docs after each phase completes |
+| Q   | Item                     | Decision                                                                                                                                                                                                                              |
+| --- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| —   | Worker placement         | **B (revised)** — worker runs INSIDE app process on startup (app entrypoint boots BullMQ Worker); no separate compose service                                                                                                         |
+| —   | PgBouncer mode           | **Transaction pool mode**; app → `pgbouncer:6432`, migrations/seed → direct `postgres:5432`                                                                                                                                           |
+| —   | Rate limiting            | **`rate-limiter-flexible`** (Redis store) as Nitro `onRequest` middleware + **TanStack Pacer** client-side                                                                                                                            |
+| —   | Redis cache              | **Queue + rate-limit only now**; server-side data cache deferred to a later sub-phase                                                                                                                                                 |
+| —   | TanStack adds            | **Pacer + Virtual + Devtools** — Pacer = canonical client debounce/throttle; in-repo `use-debounce`/`use-debounced-callback` hooks to be removed                                                                                      |
+| Q1  | Postgres image           | **B** — `postgres:17` (Debian-based)                                                                                                                                                                                                  |
+| Q2  | PgBouncer image          | **B** (revised) — `bitnami/pgbouncer` image (env/ini config, healthchecks); drop custom Dockerfile                                                                                                                                    |
+| Q3  | PgBouncer sizing         | **B** — Conservative: `default_pool_size=10`, `max_client_conn=100`                                                                                                                                                                   |
+| Q4  | Redis image/persist      | **A** — `redis:7-alpine`, **no persistence** (queue + rate-limit only)                                                                                                                                                                |
+| Q5  | Caddy TLS                | **Cloudflare Tunnel on SEPARATE VM** — points to prod VM IP, SSL auto-terminated by Cloudflare. Caddy on prod VM = plain HTTP proxy (`:80`→`app:3000`), port **published to host** so the tunnel VM can reach it; no certs in compose |
+| Q6  | Rate-limit tiers         | **B (revised)** — Auth `10/min`, Server-fn `100/min`; **drop global** limiter (bounded by auth+fn)                                                                                                                                    |
+| Q7  | Rate-limit on Redis down | **A** — **Fail-open** (allow request, log warning)                                                                                                                                                                                    |
+| Q8  | Queue scope              | **A** — `email` queue only (magic-link, welcome, password reset)                                                                                                                                                                      |
+| Q9  | Email job retry          | **A** — 3 attempts, exponential backoff `1m → 5m → 30m`, dead-letter on final failure                                                                                                                                                 |
+| Q10 | Worker concurrency       | **A** — 1 worker process, `concurrency=5`                                                                                                                                                                                             |
+| Q11 | Virtual target tables    | **A** — Products + Users tables                                                                                                                                                                                                       |
+| Q12 | Devtools scope           | **B** — **Keep both** `@tanstack/devtools` (unified) AND existing Router/Query devtools in `__root.tsx`; review at P-I4 (docs note)                                                                                                   |
+| Q13 | Pacer primitives         | **A** — throttle + debounce + rate-limit                                                                                                                                                                                              |
+| Q14 | Dev-mode fallback        | **A** — Detect `REDIS_URL`/`DATABASE_URL_DIRECT` presence; missing = rate-limit no-op + queue disabled + connect direct to Postgres                                                                                                   |
+| Q15 | Sentry / observability   | **A** — Stay "Later"; not bundled with infra hardening                                                                                                                                                                                |
+| Q16 | Docs sync                | **A** — Update docs after each phase completes                                                                                                                                                                                        |
 
 ## 5.2b Round-2 lock — compose/runtime detail (26 items)
 
 All **A** (recommended) unless noted. Q6 answered by user.
 
-| ID | Item | Decision |
-|----|------|----------|
-| R2-Q1 | PgBouncer conn | **A** — TCP `pgbouncer:6432` |
-| R2-Q2 | Postgres user/pw | **A** — same user `tanstack`, stronger 32-char pw in VPS `.env` |
-| R2-Q3 | PgBouncer `auth_type` | **A** — `scram-sha-256` + `userlist.txt` |
-| R2-Q4 | Postgres `max_connections` | **A** — `100` |
-| R2-Q5 | Compose network | **A** — default bridge |
-| R2-Q6 | Cloudflare Tunnel host | **USER** — **separate VM**; points to prod VM IP; SSL auto-terminated by Cloudflare; NOT in compose |
-| R2-Q7 | App port binding | **A** — `app` internal-only (no published port); Caddy reaches `app:3000` on compose net |
-| R2-Q8 | Volume strategy | **A** — named volumes `pgdata`, `redisdata` |
-| R2-Q9 | Compose project name | **A** — default |
-| R2-Q10 | Backup | **A** — `docker exec pg_dump` cron on host, nightly, keep 7d |
-| R2-Q11 | Nitro hook fallback | **A** — server middleware (`defineEventHandler` wrapper) if `onRequest` unavailable on `bun` preset |
-| R2-Q12 | Rate-limit IP source | **A** — `cf-connecting-ip` (behind Cloudflare) |
-| R2-Q13 | Limiter storage | **B (revised)** — 2 limiters (auth/fn) share 1 ioredis conn; global dropped |
-| R2-Q14 | Worker shutdown | **B (revised)** — no separate service; SIGTERM handled in-process via BullMQ `Worker.close()` on app shutdown |
-| R2-Q15 | Dead-letter store | **A** — same Redis `email:failed` key |
-| R2-Q16 | Bull Board | **A** — no, defer |
-| R2-Q17 | Worker startup | **A** — app entrypoint: `pg_isready` → `drizzle-kit migrate` → boot app + BullMQ Worker in-process (no separate migrator) |
-| R2-Q18 | Devtools | **B** — keep BOTH `@tanstack/devtools` + existing Router/Query devtools in `__root.tsx`; note in docs (review at P-I4) |
-| R2-Q19 | Virtual integration | **A** — row virtualization |
-| R2-Q20 | Pacer wrapper | **KEEP Pacer** — thin hooks (`useDebouncedValue`, `useThrottledCallback`, `useRateLimited`); **remove** in-repo `src/hooks/use-debounce.tsx` + `src/hooks/use-debounced-callback.tsx`; migate `use-data-table.ts` to Pacer |
-| R2-Q21 | package.json scripts | **A** — add `db:migrate:direct`; `worker`/`worker:dev` optional for local dev w/ Redis (in-process by default) |
-| R2-Q22 | .dockerignore | **A** — standard set (exclude `node_modules`, `test-results`, `graphify-out`, `.git`; include `bun.lock`, not `.output/`) |
-| R2-Q23 | compose override | **B (revised)** — skip `docker-compose.dev.yml`; local dev uses R2-Q14 fallback (`bun dev`, no infra) |
-| R2-Q24 | CI matrix | **A** — 2-job (`test` + `build`) |
-| R2-Q25 | entrypoint.sh ordering | **A** — `pg_isready` poll → `drizzle-kit migrate` → start app |
-| R2-Q26 | Seed policy | **A** — never seed in prod; manual `bun run db:seed` only |
+| ID     | Item                       | Decision                                                                                                                                                                                                                   |
+| ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-Q1  | PgBouncer conn             | **A** — TCP `pgbouncer:6432`                                                                                                                                                                                               |
+| R2-Q2  | Postgres user/pw           | **A** — same user `tanstack`, stronger 32-char pw in VPS `.env`                                                                                                                                                            |
+| R2-Q3  | PgBouncer `auth_type`      | **A** — `scram-sha-256` + `userlist.txt`                                                                                                                                                                                   |
+| R2-Q4  | Postgres `max_connections` | **A** — `100`                                                                                                                                                                                                              |
+| R2-Q5  | Compose network            | **A** — default bridge                                                                                                                                                                                                     |
+| R2-Q6  | Cloudflare Tunnel host     | **USER** — **separate VM**; points to prod VM IP; SSL auto-terminated by Cloudflare; NOT in compose                                                                                                                        |
+| R2-Q7  | App port binding           | **A** — `app` internal-only (no published port); Caddy reaches `app:3000` on compose net                                                                                                                                   |
+| R2-Q8  | Volume strategy            | **A** — named volumes `pgdata`, `redisdata`                                                                                                                                                                                |
+| R2-Q9  | Compose project name       | **A** — default                                                                                                                                                                                                            |
+| R2-Q10 | Backup                     | **A** — `docker exec pg_dump` cron on host, nightly, keep 7d                                                                                                                                                               |
+| R2-Q11 | Nitro hook fallback        | **A** — server middleware (`defineEventHandler` wrapper) if `onRequest` unavailable on `bun` preset                                                                                                                        |
+| R2-Q12 | Rate-limit IP source       | **A** — `cf-connecting-ip` (behind Cloudflare)                                                                                                                                                                             |
+| R2-Q13 | Limiter storage            | **B (revised)** — 2 limiters (auth/fn) share 1 ioredis conn; global dropped                                                                                                                                                |
+| R2-Q14 | Worker shutdown            | **B (revised)** — no separate service; SIGTERM handled in-process via BullMQ `Worker.close()` on app shutdown                                                                                                              |
+| R2-Q15 | Dead-letter store          | **A** — same Redis `email:failed` key                                                                                                                                                                                      |
+| R2-Q16 | Bull Board                 | **A** — no, defer                                                                                                                                                                                                          |
+| R2-Q17 | Worker startup             | **A** — app entrypoint: `pg_isready` → `drizzle-kit migrate` → boot app + BullMQ Worker in-process (no separate migrator)                                                                                                  |
+| R2-Q18 | Devtools                   | **B** — keep BOTH `@tanstack/devtools` + existing Router/Query devtools in `__root.tsx`; note in docs (review at P-I4)                                                                                                     |
+| R2-Q19 | Virtual integration        | **A** — row virtualization                                                                                                                                                                                                 |
+| R2-Q20 | Pacer wrapper              | **KEEP Pacer** — thin hooks (`useDebouncedValue`, `useThrottledCallback`, `useRateLimited`); **remove** in-repo `src/hooks/use-debounce.tsx` + `src/hooks/use-debounced-callback.tsx`; migate `use-data-table.ts` to Pacer |
+| R2-Q21 | package.json scripts       | **A** — add `db:migrate:direct`; `worker`/`worker:dev` optional for local dev w/ Redis (in-process by default)                                                                                                             |
+| R2-Q22 | .dockerignore              | **A** — standard set (exclude `node_modules`, `test-results`, `graphify-out`, `.git`; include `bun.lock`, not `.output/`)                                                                                                  |
+| R2-Q23 | compose override           | **B (revised)** — skip `docker-compose.dev.yml`; local dev uses R2-Q14 fallback (`bun dev`, no infra)                                                                                                                      |
+| R2-Q24 | CI matrix                  | **A** — 2-job (`test` + `build`)                                                                                                                                                                                           |
+| R2-Q25 | entrypoint.sh ordering     | **A** — `pg_isready` poll → `drizzle-kit migrate` → start app                                                                                                                                                              |
+| R2-Q26 | Seed policy                | **A** — never seed in prod; manual `bun run db:seed` only                                                                                                                                                                  |
 
 ### 5.2c Pacer wrappers (PA-9 — locked: thin wrappers per plan)
 
@@ -358,6 +377,7 @@ All **A** (recommended) unless noted. Q6 answered by user.
 > Pacer into call sites. Then we delete the two in-repo hooks.
 
 **New files (`src/hooks/pacer/`):**
+
 - `use-debounced-value.ts` → wraps Pacer `debounce` → replaces `use-debounce.tsx` (`useDebounce<T>`).
 - `use-throttled-callback.ts` → wraps Pacer `throttle` → replaces `use-debounced-callback.ts` (`useDebouncedCallback`).
 - `use-rate-limited.ts` → wraps Pacer `rateLimit` → new (no current equivalent; used later by P-I controls).
@@ -391,7 +411,7 @@ db (postgres:17) :5432, max_connections=100, volume pgdata   (R2-Q4, R2-Q8)
   `DATABASE_URL_DIRECT` (bypass pgbouncer — transaction mode breaks
   multi-statement migrations).
   - **Item 10 (PB-10 clarified):** `db:migrate:direct` (R2-Q21) is an
-    **explicit alias of `db:migrate`** that *also* forces `DATABASE_URL_DIRECT`
+    **explicit alias of `db:migrate`** that _also_ forces `DATABASE_URL_DIRECT`
     and is what the container `entrypoint.sh` calls (PA-10). The difference is
     purely that `:direct` can never accidentally inherit the pgbouncer `DATABASE_URL`
     when run inside compose. Local dev may use either; CI/entrypoint use `:direct`.
@@ -402,11 +422,11 @@ db (postgres:17) :5432, max_connections=100, volume pgdata   (R2-Q4, R2-Q8)
 
 ## 5.5 Phase breakdown (appends to phased table)
 
-| Phase | Work | Output |
-|-------|------|--------|
-| **P-I1 Infra** | compose (postgres + pgbouncer + redis + app + worker + caddy); env split; `src/lib/db/index.ts` connection split; `db:*` scripts → direct URL | Runnable hardened stack locally |
-| **P-I2 Rate limit** | `rate-limiter-flexible` + ioredis; Nitro `onRequest` middleware (or `defineEventHandler` fallback, 5.6.1) keyed by `cf-connecting-ip` — strict `10/min` on `/api/auth/*`, `100/min` on server-fns; **no global limiter** (R2-Q6=B) | Server-side rate limiting |
-| **P-I3 BullMQ** | `src/lib/queue/{connection,email-queue,email-worker,start-worker}.ts` (connection, `email` queue, in-process `Worker`, idempotent startup); Better Auth magic-link `sendMagicLink` enqueues (ties to P4 email work) | Async email off request path |
+| Phase               | Work                                                                                                                                                                                                                               | Output                          |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| **P-I1 Infra**      | compose (postgres + pgbouncer + redis + app + worker + caddy); env split; `src/lib/db/index.ts` connection split; `db:*` scripts → direct URL                                                                                      | Runnable hardened stack locally |
+| **P-I2 Rate limit** | `rate-limiter-flexible` + ioredis; Nitro `onRequest` middleware (or `defineEventHandler` fallback, 5.6.1) keyed by `cf-connecting-ip` — strict `10/min` on `/api/auth/*`, `100/min` on server-fns; **no global limiter** (R2-Q6=B) | Server-side rate limiting       |
+| **P-I3 BullMQ**     | `src/lib/queue/{connection,email-queue,email-worker,start-worker}.ts` (connection, `email` queue, in-process `Worker`, idempotent startup); Better Auth magic-link `sendMagicLink` enqueues (ties to P4 email work)                | Async email off request path    |
 
 > **PA-11 — worker file naming.** No standalone `src/worker.ts` entry point
 > (that implied a separate process). Per D1-B (R2-Q14=B) the BullMQ `Worker`
@@ -415,8 +435,8 @@ db (postgres:17) :5432, max_connections=100, volume pgdata   (R2-Q4, R2-Q8)
 > is handled in-process via `Worker.close()` (R2-Q14=B). `email-queue.ts`
 > exposes the `Queue('email', { connection })`; `email-worker.ts` is the
 > `Worker('email', processor, { connection, concurrency: 5 })` (Q10=A).
-| **P-I4 TanStack libs** | Pacer (client throttle/debounce hooks); Virtual (virtualize product/user tables); Devtools (unified panel in `__root.tsx`) | Client hardening + DX |
-| **Later** | Redis server-side data cache (dashboard aggregates, product list) | Hot-path caching |
+> | **P-I4 TanStack libs** | Pacer (client throttle/debounce hooks); Virtual (virtualize product/user tables); Devtools (unified panel in `__root.tsx`) | Client hardening + DX |
+> | **Later** | Redis server-side data cache (dashboard aggregates, product list) | Hot-path caching |
 
 ## 5.6 Verification gates (replaces the old "key risks" list — PA-8 / R2-Q11)
 
@@ -467,26 +487,27 @@ _End of Section 5. No files created._
 
 ## 6.1 B — Files the plan MUST touch but did not enumerate
 
-| ID | File (current) | Why it's missed by the plan |
-|----|----------------|-------------------------------------------|
-| PB-1 | `src/components/layout/app-sidebar.tsx:152-155` | Hardcoded "Sign out" `<DropdownMenuItem>` — no `onClick`. Plan never lists it. After P3 it still renders dead UI unless wired to `authClient.signOut()`. |
-| PB-2 | `src/components/layout/user-nav.tsx` | Entire `UserNav` is hardcoded `User` / `user@example.com`; **not mounted** in `header.tsx`. Plan must decide: delete, mount real, or leave dormant. |
-| PB-3 | `scripts/seed.ts:41-54` | `seedUsers` never sets `password_hash` (depends on the nullable column). After O9 (drop column + wipe) it's moot, BUT Better Auth seeding needs a new path (CLI / `auth.api.signUpEmail`). Plan never describes it. |
-| PB-4 | `src/features/users/components/users-table/columns.tsx:37-66` + `options.tsx` | Role + status columns + role filter (`useSearch().role` → `filters.roles` → `inArray(users.role, roles)`) break on `users` table removal (O8-B). Plan said "tracked in P2/P3" with no re-pointing. |
-| PB-5 | `src/features/users/components/user-form-sheet.tsx:138-147` | `<FormSelectField name="role" options={ROLE_OPTIONS} />` — needs re-source (Better Auth roles) or removal. |
-| PB-6 | `src/features/users/schemas/user.ts` + form sheet `status` field | `userSchema` keeps `role` & `status`; even after dropping `role`, `status` must be resolved (→ `banned`/`metadata`). |
-| PB-7 | `src/lib/db/schema/users.ts` | `id: serial('id').primaryKey()` — Better Auth `user` table owns `id` (text/uuid by convention). Drop of `users` table implied but not spelled out. |
-| PB-8 | `drizzle.config.ts` | Plan lists it (§2.2) for `auth-schema.ts` add, but doesn't note `users.ts` must be **removed** from the schema list in the same edit. |
-| PB-9 | `src/components/themes/active-theme.tsx:7-11` + `src/routes/__root.tsx:21-22` | Plan hardens `auth_token` cookies, but `__root.tsx` also reads `active_theme` cookie (no `__Host-`). §5.9 resolves: `active_theme` stays plain. |
-| PB-10 | `package.json` scripts | Plan adds `db:migrate:direct` (R2-Q21) but never states the diff from current `db:migrate` (env gate switch to `DATABASE_URL_DIRECT`). |
-| PB-11 | `src/routes/auth/v2/*` (4 routes) | Plan keeps V1+V2 (Q9). They're inert until rebuilt to consume `authClient`. Fine — just confirming they survive P3. |
-| PB-12 | `e2e/*.spec.ts` | No auth E2E exists. Plan never adds one in P2/P3, but swapping the whole auth path should exercise a protected route behind the new session. |
+| ID    | File (current)                                                                | Why it's missed by the plan                                                                                                                                                                                         |
+| ----- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PB-1  | `src/components/layout/app-sidebar.tsx:152-155`                               | Hardcoded "Sign out" `<DropdownMenuItem>` — no `onClick`. Plan never lists it. After P3 it still renders dead UI unless wired to `authClient.signOut()`.                                                            |
+| PB-2  | `src/components/layout/user-nav.tsx`                                          | Entire `UserNav` is hardcoded `User` / `user@example.com`; **not mounted** in `header.tsx`. Plan must decide: delete, mount real, or leave dormant.                                                                 |
+| PB-3  | `scripts/seed.ts:41-54`                                                       | `seedUsers` never sets `password_hash` (depends on the nullable column). After O9 (drop column + wipe) it's moot, BUT Better Auth seeding needs a new path (CLI / `auth.api.signUpEmail`). Plan never describes it. |
+| PB-4  | `src/features/users/components/users-table/columns.tsx:37-66` + `options.tsx` | Role + status columns + role filter (`useSearch().role` → `filters.roles` → `inArray(users.role, roles)`) break on `users` table removal (O8-B). Plan said "tracked in P2/P3" with no re-pointing.                  |
+| PB-5  | `src/features/users/components/user-form-sheet.tsx:138-147`                   | `<FormSelectField name="role" options={ROLE_OPTIONS} />` — needs re-source (Better Auth roles) or removal.                                                                                                          |
+| PB-6  | `src/features/users/schemas/user.ts` + form sheet `status` field              | `userSchema` keeps `role` & `status`; even after dropping `role`, `status` must be resolved (→ `banned`/`metadata`).                                                                                                |
+| PB-7  | `src/lib/db/schema/users.ts`                                                  | `id: serial('id').primaryKey()` — Better Auth `user` table owns `id` (text/uuid by convention). Drop of `users` table implied but not spelled out.                                                                  |
+| PB-8  | `drizzle.config.ts`                                                           | Plan lists it (§2.2) for `auth-schema.ts` add, but doesn't note `users.ts` must be **removed** from the schema list in the same edit.                                                                               |
+| PB-9  | `src/components/themes/active-theme.tsx:7-11` + `src/routes/__root.tsx:21-22` | Plan hardens `auth_token` cookies, but `__root.tsx` also reads `active_theme` cookie (no `__Host-`). §5.9 resolves: `active_theme` stays plain.                                                                     |
+| PB-10 | `package.json` scripts                                                        | Plan adds `db:migrate:direct` (R2-Q21) but never states the diff from current `db:migrate` (env gate switch to `DATABASE_URL_DIRECT`).                                                                              |
+| PB-11 | `src/routes/auth/v2/*` (4 routes)                                             | Plan keeps V1+V2 (Q9). They're inert until rebuilt to consume `authClient`. Fine — just confirming they survive P3.                                                                                                 |
+| PB-12 | `e2e/*.spec.ts`                                                               | No auth E2E exists. Plan never adds one in P2/P3, but swapping the whole auth path should exercise a protected route behind the new session.                                                                        |
 
 ## 6.2 C — Deletion lock (explicit deletes, not "depends")
 
 Apply these as concrete deletions, sequenced per phase:
 
 **P2 / P-Auth-Users (Better Auth cutover):**
+
 1. `src/lib/auth/server.ts` — entire file (`signInUserFn`, `signUpUserFn`, `getSessionFn`, `signOutUserFn`).
 2. `src/lib/auth/client.tsx` — entire file (`AuthProvider`, `useAuth`).
 3. `src/lib/db/schema/users.ts` — entire file (drops `users` table from Drizzle schema).
@@ -499,55 +520,52 @@ Apply these as concrete deletions, sequenced per phase:
 
 **P3 (deps):** `bcryptjs`, `jose`, `@types/bcryptjs` (consolidated PA-6).
 
-**P-I4 (Pacer wins):**
-10. `src/hooks/use-debounce.tsx` — superseded by Pacer `useDebouncedValue`.
-11. `src/hooks/use-debounced-callback.ts` — superseded by Pacer `useThrottledCallback`.
-12. `src/hooks/use-callback-ref.tsx` — dead after #11 (only consumer was `use-debounced-callback.ts`).
+**P-I4 (Pacer wins):** 10. `src/hooks/use-debounce.tsx` — superseded by Pacer `useDebouncedValue`. 11. `src/hooks/use-debounced-callback.ts` — superseded by Pacer `useThrottledCallback`. 12. `src/hooks/use-callback-ref.tsx` — dead after #11 (only consumer was `use-debounced-callback.ts`).
 
 ## 6.3 D — Overlap / keep candidates (resolved)
 
-| ID | Item | Decision |
-|----|-------|-----------|
-| PD-1 | `getSessionFn` (wrapper) | Replaced inline in `dashboard.tsx` `beforeLoad` with `auth.api.getSession({ headers: ctx.request.headers })`. No standalone wrapper. |
-| PD-2 | `active_theme` cookie / `ActiveThemeProvider` / `getActiveTheme` | Orthogonal to auth. Kept; **excluded** from `__Host-` (§5.9). |
-| PD-3 | `users.status` column | Per user decision: **dropped** with `users.role` (O8-B expanded). Moves to Better Auth `banned` / profile `metadata`. |
-| PD-4 | 3 devtools panels (`TanStackRouterDevtools` + `ReactQueryDevtools` + new `TanStackDevtools`) | Per R2-Q12=B / R2-Q18=B + user: **keep all three** in dev (`__root.tsx`). Review at P-I4. |
-| PD-5 | V1 vs V2 auth routes | Kept (Q9). Doc sentence added: both variants exist as a UX choice, not technical debt. |
-| PD-6 | `__Host-` cookie prefix (O10=B) | Per user: **`auth_token` only, prod-only** (`NODE_ENV==='production'` gate). Dev keeps unprefixed name. |
-| PD-7 | `seedUsers` replacement strategy | Recommend `scripts/seed-users.ts` calling `auth.api.signUpEmail` (option (a)) over a temp `betterAuth({...})` bootstrap — flagged for user confirmation in execution. |
+| ID   | Item                                                                                         | Decision                                                                                                                                                              |
+| ---- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PD-1 | `getSessionFn` (wrapper)                                                                     | Replaced inline in `dashboard.tsx` `beforeLoad` with `auth.api.getSession({ headers: ctx.request.headers })`. No standalone wrapper.                                  |
+| PD-2 | `active_theme` cookie / `ActiveThemeProvider` / `getActiveTheme`                             | Orthogonal to auth. Kept; **excluded** from `__Host-` (§5.9).                                                                                                         |
+| PD-3 | `users.status` column                                                                        | Per user decision: **dropped** with `users.role` (O8-B expanded). Moves to Better Auth `banned` / profile `metadata`.                                                 |
+| PD-4 | 3 devtools panels (`TanStackRouterDevtools` + `ReactQueryDevtools` + new `TanStackDevtools`) | Per R2-Q12=B / R2-Q18=B + user: **keep all three** in dev (`__root.tsx`). Review at P-I4.                                                                             |
+| PD-5 | V1 vs V2 auth routes                                                                         | Kept (Q9). Doc sentence added: both variants exist as a UX choice, not technical debt.                                                                                |
+| PD-6 | `__Host-` cookie prefix (O10=B)                                                              | Per user: **`auth_token` only, prod-only** (`NODE_ENV==='production'` gate). Dev keeps unprefixed name.                                                               |
+| PD-7 | `seedUsers` replacement strategy                                                             | Recommend `scripts/seed-users.ts` calling `auth.api.signUpEmail` (option (a)) over a temp `betterAuth({...})` bootstrap — flagged for user confirmation in execution. |
 
 ## 6.4 §5.8 — P-Auth-Users migration map (sits between P2 and P3)
 
 File-by-file, with citations:
 
-| File | Action | Detail |
-|------|--------|--------|
-| `src/lib/db/users.ts` | REWRITE | Replace Drizzle `getUsers`/`createUser`/`updateUser`/`deleteUser` with Better Auth admin-plugin wrappers (`authClient.admin.listUsers`, `.createUser`, `.updateUser`, `.removeUser`). `sortColumn`/`inArray(users.role,...)` lines deleted. |
-| `src/lib/db/schema/index.ts` | EDIT | `export * from './users'` removed (table gone). |
-| `src/features/users/api/queries.ts` | EDIT | `usersQueryOptions` → calls new `listUsersFn`. Drop `roles` filter param. |
-| `src/features/users/api/mutations.ts` | EDIT | `createUserMutation`/`updateUserMutation`/`deleteUserMutation` → Better Auth admin client wrappers. Drop `role`/`status` payload fields. |
-| `src/features/users/api/service.ts` | EDIT | Re-export new server fns. |
-| `src/features/users/api/types.ts` | EDIT | `User` type: drop `role` + `status`. Keep `first_name`,`last_name`,`email`,`phone`,`created_at`,`updated_at` (or map to Better Auth `user` shape). |
-| `src/features/users/schemas/user.ts` | EDIT | `userSchema`: remove `role` + `status` (§8-C #8). |
-| `src/features/users/components/users-table/columns.tsx` | EDIT | Delete `role` (id 37) + `status` (id 58) columns + badge logic. |
-| `src/features/users/components/users-table/options.tsx` | DELETE | Entire file (§8-C #7). |
-| `src/features/users/components/users-table/index.tsx` | EDIT | Remove `role` from `useSearch()` destructuring + `filters.roles` wiring (lines 18, 26). |
-| `src/features/users/components/user-form-sheet.tsx` | EDIT | Remove `<FormSelectField name="role" ...>` (138-147) + `status` field; `defaultValues.role/.status` removed. |
-| `src/features/users/components/user-listing.tsx` | REVIEW | Confirm no `users.role`/`users.status` reads; adjust if present. |
-| `scripts/seed.ts` | EDIT | Remove `seedUsers` + `USER_ROLES`/`USER_STATUSES` + `users` import (§8-C #6). |
-| `src/components/layout/app-sidebar.tsx` | EDIT | Wire "Sign out" → `authClient.signOut()`; replace hardcoded `User`/`user@example.com` with `useSession()` values (PB-1). |
-| `src/components/layout/user-nav.tsx` | **DELETE (decided).** Unmounted dead stub (not imported by `header.tsx` — verified). Removed now; Better Auth-aware user menu is wired into `app-sidebar.tsx` "Sign out" at P3 (§6.4). See §6.8 #3. |
-| `src/routes/__root.tsx` | EDIT | Remove `<AuthProvider>` (79-82); rely on `authClient.useSession`. Add `TanStackDevtools` (see §5.10). |
-| `src/routes/dashboard.tsx` | EDIT | `beforeLoad` → `auth.api.getSession({ headers: ctx.request.headers })` (replace `getSessionFn`, PD-1). |
-| `src/features/auth/components/user-auth-form.tsx` | EDIT | `signIn` from `authClient.signIn.email` (replace `useAuth().signIn`). |
-| `src/features/auth/components/register-form.tsx` | EDIT | `signUp` from `authClient.signUp.email` (replace `useAuth().signUp`). |
+| File                                                    | Action                                                                                                                                                                                              | Detail                                                                                                                                                                                                                                      |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/db/users.ts`                                   | REWRITE                                                                                                                                                                                             | Replace Drizzle `getUsers`/`createUser`/`updateUser`/`deleteUser` with Better Auth admin-plugin wrappers (`authClient.admin.listUsers`, `.createUser`, `.updateUser`, `.removeUser`). `sortColumn`/`inArray(users.role,...)` lines deleted. |
+| `src/lib/db/schema/index.ts`                            | EDIT                                                                                                                                                                                                | `export * from './users'` removed (table gone).                                                                                                                                                                                             |
+| `src/features/users/api/queries.ts`                     | EDIT                                                                                                                                                                                                | `usersQueryOptions` → calls new `listUsersFn`. Drop `roles` filter param.                                                                                                                                                                   |
+| `src/features/users/api/mutations.ts`                   | EDIT                                                                                                                                                                                                | `createUserMutation`/`updateUserMutation`/`deleteUserMutation` → Better Auth admin client wrappers. Drop `role`/`status` payload fields.                                                                                                    |
+| `src/features/users/api/service.ts`                     | EDIT                                                                                                                                                                                                | Re-export new server fns.                                                                                                                                                                                                                   |
+| `src/features/users/api/types.ts`                       | EDIT                                                                                                                                                                                                | `User` type: drop `role` + `status`. Keep `first_name`,`last_name`,`email`,`phone`,`created_at`,`updated_at` (or map to Better Auth `user` shape).                                                                                          |
+| `src/features/users/schemas/user.ts`                    | EDIT                                                                                                                                                                                                | `userSchema`: remove `role` + `status` (§8-C #8).                                                                                                                                                                                           |
+| `src/features/users/components/users-table/columns.tsx` | EDIT                                                                                                                                                                                                | Delete `role` (id 37) + `status` (id 58) columns + badge logic.                                                                                                                                                                             |
+| `src/features/users/components/users-table/options.tsx` | DELETE                                                                                                                                                                                              | Entire file (§8-C #7).                                                                                                                                                                                                                      |
+| `src/features/users/components/users-table/index.tsx`   | EDIT                                                                                                                                                                                                | Remove `role` from `useSearch()` destructuring + `filters.roles` wiring (lines 18, 26).                                                                                                                                                     |
+| `src/features/users/components/user-form-sheet.tsx`     | EDIT                                                                                                                                                                                                | Remove `<FormSelectField name="role" ...>` (138-147) + `status` field; `defaultValues.role/.status` removed.                                                                                                                                |
+| `src/features/users/components/user-listing.tsx`        | REVIEW                                                                                                                                                                                              | Confirm no `users.role`/`users.status` reads; adjust if present.                                                                                                                                                                            |
+| `scripts/seed.ts`                                       | EDIT                                                                                                                                                                                                | Remove `seedUsers` + `USER_ROLES`/`USER_STATUSES` + `users` import (§8-C #6).                                                                                                                                                               |
+| `src/components/layout/app-sidebar.tsx`                 | EDIT                                                                                                                                                                                                | Wire "Sign out" → `authClient.signOut()`; replace hardcoded `User`/`user@example.com` with `useSession()` values (PB-1).                                                                                                                    |
+| `src/components/layout/user-nav.tsx`                    | **DELETE (decided).** Unmounted dead stub (not imported by `header.tsx` — verified). Removed now; Better Auth-aware user menu is wired into `app-sidebar.tsx` "Sign out" at P3 (§6.4). See §6.8 #3. |
+| `src/routes/__root.tsx`                                 | EDIT                                                                                                                                                                                                | Remove `<AuthProvider>` (79-82); rely on `authClient.useSession`. Add `TanStackDevtools` (see §5.10).                                                                                                                                       |
+| `src/routes/dashboard.tsx`                              | EDIT                                                                                                                                                                                                | `beforeLoad` → `auth.api.getSession({ headers: ctx.request.headers })` (replace `getSessionFn`, PD-1).                                                                                                                                      |
+| `src/features/auth/components/user-auth-form.tsx`       | EDIT                                                                                                                                                                                                | `signIn` from `authClient.signIn.email` (replace `useAuth().signIn`).                                                                                                                                                                       |
+| `src/features/auth/components/register-form.tsx`        | EDIT                                                                                                                                                                                                | `signUp` from `authClient.signUp.email` (replace `useAuth().signUp`).                                                                                                                                                                       |
 
 ## 6.5 §5.9 — Cookie scope clarification (resolves PB-9 / O10-B)
 
-| Cookie | `__Host-` prefix? | Env gate | Notes |
-|--------|------------------|-----------|-------|
-| `auth_token` (Better Auth session) | **YES**, but only when `NODE_ENV==='production'` | prod-only | Browsers reject `__Host-` over plain HTTP, so `bun dev` keeps the unprefixed name. |
-| `active_theme` | **NO** | — | Set client-side (`active-theme.tsx:7-11`). Deliberately excluded; documented exception. |
+| Cookie                             | `__Host-` prefix?                                | Env gate  | Notes                                                                                   |
+| ---------------------------------- | ------------------------------------------------ | --------- | --------------------------------------------------------------------------------------- |
+| `auth_token` (Better Auth session) | **YES**, but only when `NODE_ENV==='production'` | prod-only | Browsers reject `__Host-` over plain HTTP, so `bun dev` keeps the unprefixed name.      |
+| `active_theme`                     | **NO**                                           | —         | Set client-side (`active-theme.tsx:7-11`). Deliberately excluded; documented exception. |
 
 ## 6.6 §5.10 — Devtools tri-panel layout (`__root.tsx`, dev only)
 
@@ -555,9 +573,9 @@ File-by-file, with citations:
 <ThemeProvider>
   <ActiveThemeProvider>
     <Outlet />
-    <TanStackRouterDevtools position='bottom-left' />   // existing
-    <ReactQueryDevtools initialIsOpen={false} />          // existing
-    <TanStackDevtools position='bottom-right' />          // NEW (unified)
+    <TanStackRouterDevtools position='bottom-left' /> // existing
+    <ReactQueryDevtools initialIsOpen={false} /> // existing
+    <TanStackDevtools position='bottom-right' /> // NEW (unified)
   </ActiveThemeProvider>
 </ThemeProvider>
 ```
@@ -584,19 +602,19 @@ Mirror of §8-C, single checklist for execution:
 
 ## 6.8 Open items register (single source of truth)
 
-| # | Item | Resolution / status |
-|---|------|----------------------|
-| 1 | `seedUsers` replacement | **Resolved (recipe in §6.9.1).** `scripts/seed-users.ts` → `auth.api.createUser({ body: { email, password, name, role } })` loop (bypasses email verification, applies `admin` role, Better Auth owns password hashing). Add `db:seed:users` script. Resolves PB-3 + O9=A. |
-| 2 | Prod `users` data preservation | **Assume none** (greenfield/demo; no prod DB yet). Safety net: one-off `scripts/export-users.ts` (§6.9.2, `auth.api.listUsers` → JSON) runs *before* `000X_drop_users.sql` (§6.9.3) if a prod `DATABASE_URL` is detected. Near-zero effort, zero risk. |
-| 3 | `user-nav.tsx` disposition (PB-2) | **DECIDED: delete.** Unmounted dead stub (no importers; verified). Removed now. Better Auth-aware user menu is wired into `app-sidebar.tsx` "Sign out" at P3. |
-| 4 | `user-listing.tsx` audit (§6.4) | **Audit at P3.** Confirm no `users.role`/`users.status` reads. |
-| 5 | `e2e` auth coverage (PB-12) | **Add at P3.** Protected-route test behind new Better Auth session. |
-| 6 | 5.6.1 Nitro `onRequest` exists? | **Gate before P-I2.** Else `defineEventHandler` fallback (R2-Q11). |
-| 7 | 5.6.7 Better Auth `/api/auth/$` under `bun` | **Verify before P2.** |
-| 8 | 5.6.8 Sentry init prod-only | **Gate on `NODE_ENV==='production'`.** Never in `bun dev`. |
-| 9 | Phase-collapse (P3 + §6.4 / P7↔P5) | **Applied.** Merged client cutover + `users` drop into single P3; dropped redundant sub-phases (§phased table note). |
-| 10 | `db:migrate` vs `:direct` diff (PB-10) | **Clarified in §5.4.** `:direct` = explicit `DATABASE_URL_DIRECT` alias used by entrypoint; local dev may use either. |
-| 11 | `dist/` `.output/` `test-results/` `graphify-out/` | **Applied to P0 (§1.2).** Added to `.gitignore` + `.dockerignore`. |
+| #   | Item                                               | Resolution / status                                                                                                                                                                                                                                                        |
+| --- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `seedUsers` replacement                            | **Resolved (recipe in §6.9.1).** `scripts/seed-users.ts` → `auth.api.createUser({ body: { email, password, name, role } })` loop (bypasses email verification, applies `admin` role, Better Auth owns password hashing). Add `db:seed:users` script. Resolves PB-3 + O9=A. |
+| 2   | Prod `users` data preservation                     | **Assume none** (greenfield/demo; no prod DB yet). Safety net: one-off `scripts/export-users.ts` (§6.9.2, `auth.api.listUsers` → JSON) runs _before_ `000X_drop_users.sql` (§6.9.3) if a prod `DATABASE_URL` is detected. Near-zero effort, zero risk.                     |
+| 3   | `user-nav.tsx` disposition (PB-2)                  | **DECIDED: delete.** Unmounted dead stub (no importers; verified). Removed now. Better Auth-aware user menu is wired into `app-sidebar.tsx` "Sign out" at P3.                                                                                                              |
+| 4   | `user-listing.tsx` audit (§6.4)                    | **Audit at P3.** Confirm no `users.role`/`users.status` reads.                                                                                                                                                                                                             |
+| 5   | `e2e` auth coverage (PB-12)                        | **Add at P3.** Protected-route test behind new Better Auth session.                                                                                                                                                                                                        |
+| 6   | 5.6.1 Nitro `onRequest` exists?                    | **Gate before P-I2.** Else `defineEventHandler` fallback (R2-Q11).                                                                                                                                                                                                         |
+| 7   | 5.6.7 Better Auth `/api/auth/$` under `bun`        | **Verify before P2.**                                                                                                                                                                                                                                                      |
+| 8   | 5.6.8 Sentry init prod-only                        | **Gate on `NODE_ENV==='production'`.** Never in `bun dev`.                                                                                                                                                                                                                 |
+| 9   | Phase-collapse (P3 + §6.4 / P7↔P5)                 | **Applied.** Merged client cutover + `users` drop into single P3; dropped redundant sub-phases (§phased table note).                                                                                                                                                       |
+| 10  | `db:migrate` vs `:direct` diff (PB-10)             | **Clarified in §5.4.** `:direct` = explicit `DATABASE_URL_DIRECT` alias used by entrypoint; local dev may use either.                                                                                                                                                      |
+| 11  | `dist/` `.output/` `test-results/` `graphify-out/` | **Applied to P0 (§1.2).** Added to `.gitignore` + `.dockerignore`.                                                                                                                                                                                                         |
 
 ## 6.9 Seed + migration recipe (concretizes items 1–2)
 
@@ -604,11 +622,12 @@ Mirror of §8-C, single checklist for execution:
 > from the `better-auth` + `@better-auth/drizzle-adapter` install in P2.
 
 ### 6.9.1 `scripts/seed-users.ts` (item 1 — replaces `seedUsers`)
+
 ```ts
-import { auth } from '@/lib/auth/auth';            // the P2 betterAuth({...}) instance
+import { auth } from '@/lib/auth/auth'; // the P2 betterAuth({...}) instance
 import { faker } from '@faker-js/faker';
 
-const ROLES = ['admin', 'user'] as const;            // Better Auth admin-plugin roles
+const ROLES = ['admin', 'user'] as const; // Better Auth admin-plugin roles
 const N = 50;
 
 for (let i = 0; i < N; i++) {
@@ -617,12 +636,13 @@ for (let i = 0; i < N; i++) {
       email: faker.internet.email(),
       password: faker.internet.password({ length: 12 }),
       name: `${faker.person.firstName()} ${faker.person.lastName()}`,
-      role: faker.helpers.arrayElement(ROLES),
+      role: faker.helpers.arrayElement(ROLES)
       // `admin` plugin: role granted; no email verification fired
-    },
+    }
   });
 }
 ```
+
 - **Why `auth.api.createUser` (not `signUpEmail`):** programmatic create
   bypasses the magic-link / verification flow, lets Better Auth own
   password hashing via the Drizzle adapter, and applies the `admin` plugin
@@ -645,6 +665,7 @@ for (let i = 0; i < N; i++) {
   `USER_STATUSES` / `users` import are deleted (§6.2 #6).
 
 ### 6.9.2 `scripts/export-users.ts` (item 2 — one-off pre-migration guard)
+
 ```ts
 import { auth } from '@/lib/auth/auth';
 import { writeFileSync } from 'node:fs';
@@ -655,6 +676,7 @@ if (users.length > 0) {
   console.log(`Exported ${users.length} users → users-export.json`);
 }
 ```
+
 - **Run order:** `bun run db:export:users` (adds script in P0/P3)
   **before** applying `000X_drop_users.sql`. Only needed if a prod
   `DATABASE_URL` points at a DB with live rows. Greenfield/demo =
@@ -663,12 +685,14 @@ if (users.length > 0) {
   risk, near-zero effort, satisfies item 2 without blocking P3.
 
 ### 6.9.3 `000X_drop_users.sql` (item 2 — the migration)
+
 ```sql
 -- Pre: run scripts/export-users.ts if prod DB has rows
 DROP TABLE IF EXISTS "users" CASCADE;
 DROP TYPE IF EXISTS "user_role";
 DROP TYPE IF EXISTS "user_status";
 ```
+
 - `drizzle-kit` regenerates `migrations/meta/000{0..4}_snapshot.json`
   after the `users` table + enums leave `drizzle.config.ts` (§6.2 #9,
   §6.4 `src/lib/db/schema/index.ts` edit).

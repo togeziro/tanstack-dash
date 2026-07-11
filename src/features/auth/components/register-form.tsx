@@ -3,15 +3,15 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppForm } from '@/components/ui/tanstack-form';
-import { useAuth } from '@/lib/auth/client';
+import { authClient } from '@/lib/auth/auth-client';
+import { useRouter } from '@tanstack/react-router';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
 const formSchema = z
   .object({
-    first_name: z.string().min(1, { message: 'First name is required' }),
-    last_name: z.string().min(1, { message: 'Last name is required' }),
+    name: z.string().min(1, { message: 'Name is required' }),
     email: z.string().email({ message: 'Enter a valid email address' }),
     password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
     confirmPassword: z.string().min(6, { message: 'Confirm password is required' })
@@ -23,12 +23,11 @@ const formSchema = z
 
 export default function RegisterForm() {
   const [loading, startTransition] = useTransition();
-  const { signUp } = useAuth();
+  const router = useRouter();
 
   const form = useAppForm({
     defaultValues: {
-      first_name: '',
-      last_name: '',
+      name: '',
       email: '',
       password: '',
       confirmPassword: ''
@@ -38,14 +37,15 @@ export default function RegisterForm() {
     },
     onSubmit: ({ value }) => {
       startTransition(async () => {
-        const result = await signUp({
+        const { error } = await authClient.signUp.email({
           email: value.email,
           password: value.password,
-          first_name: value.first_name,
-          last_name: value.last_name
+          name: value.name
         });
-        if (!result.success) {
-          toast.error(result.message || 'Registration failed');
+        if (error) {
+          toast.error(error.message || 'Registration failed');
+        } else {
+          router.navigate({ to: '/dashboard/overview' });
         }
       });
     }
@@ -55,11 +55,11 @@ export default function RegisterForm() {
     <form.AppForm>
       <form.Form className='w-full space-y-4'>
         <form.AppField
-          name='first_name'
+          name='name'
           children={(field) => (
             <field.FieldSet>
               <field.Field>
-                <field.FieldLabel htmlFor={field.name}>First Name</field.FieldLabel>
+                <field.FieldLabel htmlFor={field.name}>Name</field.FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -67,29 +67,7 @@ export default function RegisterForm() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder='John'
-                  disabled={loading}
-                  aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                />
-              </field.Field>
-              <field.FieldError />
-            </field.FieldSet>
-          )}
-        />
-        <form.AppField
-          name='last_name'
-          children={(field) => (
-            <field.FieldSet>
-              <field.Field>
-                <field.FieldLabel htmlFor={field.name}>Last Name</field.FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type='text'
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder='Doe'
+                  placeholder='John Doe'
                   disabled={loading}
                   aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 />

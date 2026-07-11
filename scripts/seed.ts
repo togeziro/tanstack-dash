@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { db } from '../src/lib/db';
-import { products, users, kanbanColumns, kanbanTasks, notifications } from '../src/lib/db/schema';
+import { products, kanbanColumns, kanbanTasks, notifications } from '../src/lib/db/schema';
 
 const PRODUCT_CATEGORIES = [
   'Electronics',
@@ -13,16 +13,7 @@ const PRODUCT_CATEGORIES = [
   'Beauty Products'
 ] as const;
 
-const USER_ROLES = [
-  'Developer',
-  'Designer',
-  'Manager',
-  'QA',
-  'DevOps',
-  'Product Owner'
-] as const;
 
-const USER_STATUSES = ['Active', 'Inactive', 'Invited'] as const;
 
 async function seedProducts(count = 20) {
   const rows = Array.from({ length: count }, (_, i) => ({
@@ -38,20 +29,7 @@ async function seedProducts(count = 20) {
   console.log(`Seeded ${rows.length} products`);
 }
 
-async function seedUsers(count = 50) {
-  const rows = Array.from({ length: count }, () => ({
-    first_name: faker.person.firstName(),
-    last_name: faker.person.lastName(),
-    email: faker.internet.email(),
-    phone: faker.phone.number({ style: 'national' }),
-    status: faker.helpers.arrayElement(USER_STATUSES),
-    role: faker.helpers.arrayElement(USER_ROLES)
-  }));
 
-  await db.delete(users);
-  await db.insert(users).values(rows);
-  console.log(`Seeded ${rows.length} users`);
-}
 
 async function seedKanban() {
   await db.delete(kanbanTasks);
@@ -112,7 +90,6 @@ async function seedNotifications() {
 async function main() {
   faker.seed(42);
   await seedProducts();
-  await seedUsers();
   await seedKanban();
   await seedNotifications();
   console.log('Seed complete');

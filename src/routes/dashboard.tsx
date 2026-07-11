@@ -8,9 +8,10 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: async () => {
-    const { getSessionFn } = await import('@/lib/auth/server');
-    const { user } = await getSessionFn();
-    if (!user) {
+    const { ensureSession } = await import('@/lib/auth/session');
+    try {
+      await ensureSession();
+    } catch {
       throw redirect({ to: '/auth/sign-in' });
     }
   },

@@ -51,8 +51,8 @@
 
 ## State Management
 
-| Technology           | Version  | Purpose                                |
-| -------------------- | -------- | -------------------------------------- |
+| Technology           | Version  | Purpose                                               |
+| -------------------- | -------- | ----------------------------------------------------- |
 | TanStack React Query | v5.101.2 | Server state (products, users, kanban, notifications) |
 
 ## Tables & Charts
@@ -133,14 +133,14 @@
 
 ## Testing
 
-| Technology           | Version | Purpose                                       |
-| -------------------- | ------- | --------------------------------------------- |
-| Vitest               | v4.1.10  | Unit & integration test runner               |
-| @testing-library/react     | v16.3.2 | React component testing              |
-| @testing-library/jest-dom  | v6.9.1  | DOM-specific matchers               |
-| @testing-library/user-event| v14.6.1 | User interaction simulation         |
-| jsdom                | v29.1.1 | DOM environment for Vitest                   |
-| Playwright           | v1.61.1 | End-to-end browser tests (Chromium)           |
+| Technology                  | Version | Purpose                             |
+| --------------------------- | ------- | ----------------------------------- |
+| Vitest                      | v4.1.10 | Unit & integration test runner      |
+| @testing-library/react      | v16.3.2 | React component testing             |
+| @testing-library/jest-dom   | v6.9.1  | DOM-specific matchers               |
+| @testing-library/user-event | v14.6.1 | User interaction simulation         |
+| jsdom                       | v29.1.1 | DOM environment for Vitest          |
+| Playwright                  | v1.61.1 | End-to-end browser tests (Chromium) |
 
 ## Linting & Formatting
 
@@ -168,10 +168,10 @@ Pre-commit hook runs: `oxlint` → `oxfmt --check` → `tsc --noEmit` on every c
 
 ## Authentication
 
-| Technology | Version | Purpose                |
-| ---------- | ------- | ---------------------- |
-| bcryptjs   | v3.0.3  | Password hashing       |
-| jose       | v6.2.3  | JWT sign / verify      |
+| Technology | Version | Purpose           |
+| ---------- | ------- | ----------------- |
+| bcryptjs   | v3.0.3  | Password hashing  |
+| jose       | v6.2.3  | JWT sign / verify |
 
 ## Other Utilities
 

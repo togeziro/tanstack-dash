@@ -40,7 +40,7 @@ lives here; per-item task checklists live in [TODO.md](./TODO.md).
 ### Next
 
 - **Role-Based Access Control (RBAC)** — many-to-many `users → roles →
-  permissions` schema; JWT-embedded permissions; `requirePermission`
+permissions` schema; JWT-embedded permissions; `requirePermission`
   middleware on every mutating server function; `useAuth().can(perm)` for UI
   hide/show. The existing `users.role` enum (`Developer`, `Designer`, ...)
   stays as a display label, untouched.
