@@ -23,3 +23,14 @@ export const authMiddleware = createMiddleware().server(async ({ next }) => {
     }
   });
 });
+
+// `requireRole('user')` is equivalent to `requireSession()` (any authenticated
+// user qualifies as a "user"). The `'user'` branch exists for API symmetry and
+// is intentionally a no-op beyond session validation.
+export async function requireRole(role: 'admin' | 'user') {
+  const session = await requireSession();
+  if (role === 'admin' && session.user.role !== 'admin') {
+    throw new Error('Forbidden');
+  }
+  return session;
+}

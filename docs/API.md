@@ -6,6 +6,24 @@ All server functions are defined in `src/features/<feature>/api/service.ts`
 and expose database operations via `createServerFn()`. Handlers use dynamic
 imports to prevent the `postgres` driver from leaking into the client bundle.
 
+### RPC boundary guarantees
+
+- **Authentication**: every endpoint calls `requireSession()` (or
+  `requireRole('admin')` for product/user writes) at the top of its handler,
+  so endpoints cannot be called unauthenticated — independent of route guards.
+- **Input validation**: every endpoint uses a Zod schema from
+  `src/features/<feature>/api/validation.ts` via `@tanstack/zod-adapter`'s
+  `zodValidator`. Schemas are typed `z.ZodType<ExistingType>` so they cannot
+  drift from the request types.
+- **Error mapping**: `lib/db/*.ts` wraps DB calls in `mapDbError`
+  (`src/lib/errors.ts`); intentional errors throw `DomainError` and pass
+  through, unexpected errors become a generic message.
+
+> Note: authentication is enforced at the boundary, but **notifications are not
+> owner-scoped** (any authenticated user can reach any notification by id). See
+> `docs/TODO.md`. "Authenticated" is not the same as "authorized" for
+> per-resource ownership.
+
 ### Products
 
 | Function           | Method | Payload                  | Returns                |

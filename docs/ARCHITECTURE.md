@@ -38,9 +38,15 @@ src/
 - **Server functions**: `createServerFn()` with `import()` inside handlers
 - **State management**: React Query for all server state (products, users, kanban, notifications)
 - **DB access**: Server-only modules in `src/lib/db/`, never imported by client code
+- **RPC boundary authz**: Every `createServerFn` endpoint enforces a valid session at the boundary (not just the route `beforeLoad`): `requireSession()` for reads/mutations, `requireRole('admin')` for product/user writes. Authz is enforced server-side so endpoints cannot be reached unauthenticated over HTTP.
+- **Input validation**: Every server-function input is validated at runtime with a Zod schema (`src/features/<f>/api/validation.ts`) via `@tanstack/zod-adapter`. These schemas use `z.ZodType<ExistingType>` so type/schema drift is a compile error.
+- **Error mapping**: `lib/db/*.ts` functions are wrapped in `try/catch` using the shared `mapDbError` (`src/lib/errors.ts`). Intentional domain errors throw `DomainError` (pass through to the client); unexpected DB errors become a generic message — no constraint/column names leak.
 - **Pre-commit hooks**: simple-git-hooks + lint-staged (oxlint, oxfmt --check, tsc --noEmit)
-- **Validation**: Runtime input validation on all server function endpoints
 - **E2E testing**: Playwright tests in `e2e/` auto-start the dev server, run headless Chromium with a single worker (shared DB), and use Radix-aware interaction helpers for dropdown menus
+
+> **Kanban board is intentionally shared** across all authenticated users. No per-user or per-board scoping exists by design (team-wide Trello-style board), so `addTask`/`moveTask` are intentionally available to any authenticated user.
+>
+> **Notifications are NOT owner-scoped** — see the security section in `docs/TODO.md`. `requireSession()` prevents unauthenticated access but does not enforce per-resource ownership (IDOR).
 
 ## Authentication Flow
 

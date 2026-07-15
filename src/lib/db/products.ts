@@ -7,6 +7,7 @@
 
 import { and, asc, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import { db } from './index';
+import { DomainError, mapDbError } from '../errors';
 import { products, productCategoryEnum } from './schema/products';
 import type {
   ProductFilters,
@@ -49,14 +50,14 @@ function sortColumn(id: string) {
 function validateCategory(category: string): ProductCategory {
   const value = productCategoryEnum.enumValues.find((c) => c === category);
   if (!value) {
-    throw new Error(`Invalid product category: "${category}"`);
+    throw new DomainError(`Invalid product category: "${category}"`);
   }
   return value;
 }
 
 function validatePrice(price: unknown): number {
   if (typeof price !== 'number' || !Number.isFinite(price)) {
-    throw new Error(`Invalid product price: ${price}`);
+    throw new DomainError(`Invalid product price: ${price}`);
   }
   return price;
 }
@@ -71,131 +72,151 @@ function serialize(row: typeof products.$inferSelect) {
 }
 
 export async function getProducts(filters: ProductFilters): Promise<ProductsResponse> {
-  const page = Math.max(1, Math.floor(filters.page ?? 1));
-  const limit = Math.min(100, Math.max(1, Math.floor(filters.limit ?? 10)));
-  const offset = (page - 1) * limit;
+  try {
+    const page = Math.max(1, Math.floor(filters.page ?? 1));
+    const limit = Math.min(100, Math.max(1, Math.floor(filters.limit ?? 10)));
+    const offset = (page - 1) * limit;
 
-  const categories = Array.isArray(filters.categories)
-    ? (filters.categories.filter((c): c is ProductCategory =>
-        productCategoryEnum.enumValues.includes(c as ProductCategory)
-      ) as ProductCategory[])
-    : [];
-  const search = filters.search?.trim();
+    const categories = Array.isArray(filters.categories)
+      ? (filters.categories.filter((c): c is ProductCategory =>
+          productCategoryEnum.enumValues.includes(c as ProductCategory)
+        ) as ProductCategory[])
+      : [];
+    const search = filters.search?.trim();
 
-  const conditions = [];
-  if (categories.length > 0) {
-    conditions.push(inArray(products.category, categories));
+    const conditions = [];
+    if (categories.length > 0) {
+      conditions.push(inArray(products.category, categories));
+    }
+    if (search) {
+      conditions.push(
+        or(
+          ilike(products.name, `%${search}%`),
+          ilike(products.description, `%${search}%`),
+          ilike(sql`${products.category}::text`, `%${search}%`)
+        )
+      );
+    }
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const sortItem = parseSort(filters.sort);
+    const col = sortItem ? sortColumn(sortItem.id) : undefined;
+    const orderBy = col ? (sortItem!.desc ? desc(col) : asc(col)) : asc(products.id);
+
+    const [rows, [{ count }]] = await Promise.all([
+      db.select().from(products).where(where).orderBy(orderBy).limit(limit).offset(offset),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(products)
+        .where(where)
+    ]);
+
+    return {
+      success: true,
+      time: new Date().toISOString(),
+      message: 'Products fetched from PostgreSQL',
+      total_products: count,
+      offset,
+      limit,
+      products: rows.map(serialize)
+    };
+  } catch (e) {
+    mapDbError(e, 'products.getProducts');
   }
-  if (search) {
-    conditions.push(
-      or(
-        ilike(products.name, `%${search}%`),
-        ilike(products.description, `%${search}%`),
-        ilike(sql`${products.category}::text`, `%${search}%`)
-      )
-    );
-  }
-  const where = conditions.length > 0 ? and(...conditions) : undefined;
-
-  const sortItem = parseSort(filters.sort);
-  const col = sortItem ? sortColumn(sortItem.id) : undefined;
-  const orderBy = col ? (sortItem!.desc ? desc(col) : asc(col)) : asc(products.id);
-
-  const [rows, [{ count }]] = await Promise.all([
-    db.select().from(products).where(where).orderBy(orderBy).limit(limit).offset(offset),
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(products)
-      .where(where)
-  ]);
-
-  return {
-    success: true,
-    time: new Date().toISOString(),
-    message: 'Products fetched from PostgreSQL',
-    total_products: count,
-    offset,
-    limit,
-    products: rows.map(serialize)
-  };
 }
 
 export async function getProductById(id: number): Promise<ProductByIdResponse> {
-  const [product] = await db.select().from(products).where(eq(products.id, id));
+  try {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
 
-  if (!product) {
+    if (!product) {
+      return {
+        success: false,
+        time: new Date().toISOString(),
+        message: `Product with ID ${id} not found`
+      } as ProductByIdResponse;
+    }
+
     return {
-      success: false,
+      success: true,
       time: new Date().toISOString(),
-      message: `Product with ID ${id} not found`
-    } as ProductByIdResponse;
+      message: `Product with ID ${id} found`,
+      product: serialize(product)
+    };
+  } catch (e) {
+    mapDbError(e, 'products.getProductById');
   }
-
-  return {
-    success: true,
-    time: new Date().toISOString(),
-    message: `Product with ID ${id} found`,
-    product: serialize(product)
-  };
 }
 
 export async function createProduct(data: ProductMutationPayload) {
-  const [created] = await db
-    .insert(products)
-    .values({
-      name: data.name,
-      description: data.description,
-      price: String(validatePrice(data.price)),
-      category: validateCategory(data.category)
-    })
-    .returning();
+  try {
+    const [created] = await db
+      .insert(products)
+      .values({
+        name: data.name,
+        description: data.description,
+        price: String(validatePrice(data.price)),
+        category: validateCategory(data.category)
+      })
+      .returning();
 
-  const photo_url = `https://api.slingacademy.com/public/sample-products/${created.id}.png`;
-  const [updated] = await db
-    .update(products)
-    .set({ photo_url })
-    .where(eq(products.id, created.id))
-    .returning();
+    const photo_url = `https://api.slingacademy.com/public/sample-products/${created.id}.png`;
+    const [updated] = await db
+      .update(products)
+      .set({ photo_url })
+      .where(eq(products.id, created.id))
+      .returning();
 
-  return {
-    success: true,
-    message: 'Product created successfully',
-    product: serialize(updated)
-  };
+    return {
+      success: true,
+      message: 'Product created successfully',
+      product: serialize(updated)
+    };
+  } catch (e) {
+    mapDbError(e, 'products.createProduct');
+  }
 }
 
 export async function updateProduct(id: number, data: ProductMutationPayload) {
-  const [existing] = await db.select().from(products).where(eq(products.id, id));
-  if (!existing) {
-    return { success: false, message: `Product with ID ${id} not found` };
+  try {
+    const [existing] = await db.select().from(products).where(eq(products.id, id));
+    if (!existing) {
+      return { success: false, message: `Product with ID ${id} not found` };
+    }
+
+    const [updated] = await db
+      .update(products)
+      .set({
+        name: data.name,
+        description: data.description,
+        price: String(validatePrice(data.price)),
+        category: validateCategory(data.category),
+        updated_at: new Date()
+      })
+      .where(eq(products.id, id))
+      .returning();
+
+    return {
+      success: true,
+      message: 'Product updated successfully',
+      product: serialize(updated)
+    };
+  } catch (e) {
+    mapDbError(e, 'products.updateProduct');
   }
-
-  const [updated] = await db
-    .update(products)
-    .set({
-      name: data.name,
-      description: data.description,
-      price: String(validatePrice(data.price)),
-      category: validateCategory(data.category),
-      updated_at: new Date()
-    })
-    .where(eq(products.id, id))
-    .returning();
-
-  return {
-    success: true,
-    message: 'Product updated successfully',
-    product: serialize(updated)
-  };
 }
 
 export async function deleteProduct(id: number) {
-  const [existing] = await db.select().from(products).where(eq(products.id, id));
-  if (!existing) {
-    return { success: false, message: `Product with ID ${id} not found` };
+  try {
+    const [existing] = await db.select().from(products).where(eq(products.id, id));
+    if (!existing) {
+      return { success: false, message: `Product with ID ${id} not found` };
+    }
+
+    await db.delete(products).where(eq(products.id, id));
+
+    return { success: true, message: 'Product deleted successfully' };
+  } catch (e) {
+    mapDbError(e, 'products.deleteProduct');
   }
-
-  await db.delete(products).where(eq(products.id, id));
-
-  return { success: true, message: 'Product deleted successfully' };
 }

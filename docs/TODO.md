@@ -91,6 +91,22 @@
 - [x] Rewrite users data-access layer for Better Auth admin API
 - [x] RBAC via Better Auth `admin` plugin — roles, permissions, `createAccessControl`
 
+## Security — RPC Boundary Hardening (Completed)
+
+- [x] `createServerFn` endpoints now enforce a valid session at the RPC boundary (not just route `beforeLoad`): `requireSession()` on reads/mutations, `requireRole('admin')` on product/user writes (Better Auth admin API).
+- [x] Every server-function input is validated with a Zod schema (`src/features/<f>/api/validation.ts`) via `@tanstack/zod-adapter`'s `zodValidator` — replacing the old type-assertion validators.
+- [x] `lib/db/*.ts` wrapped in `try/catch` using a shared `mapDbError` (`src/lib/errors.ts`); intentional domain errors use `DomainError` and pass through, unexpected DB errors become a generic message.
+
+### Open — Notifications are not owner-scoped (IDOR)
+
+> **Notifications are not owner-scoped (IDOR).** The `notifications` table has no `user_id` column. Any authenticated user can read (`getNotifications`), mark-read (`markAsRead`), delete (`removeNotification`), or mark-all-read (`markAllAsRead`) any other user's notifications via id-guessing or the unscoped `getNotifications`/`markAllAsRead` calls. `requireSession()` closes the _unauthenticated_ gap but does **not** close this _authorization_ gap — "authenticated" is not "authorized" for per-resource ownership.
+>
+> Fix requires: a schema migration adding `user_id` (nullable during backfill, since seed/system notifications have no owner), threading `session.user.id` through `addNotification` call sites, and a `WHERE user_id = ?` clause on the four read/write functions. This was deliberately left out of the boundary-hardening PR so the schema/migration decision gets its own review.
+
+### Confirmed intentional — Kanban is a shared board
+
+> The kanban board is intentionally shared across all authenticated users; no per-user or per-board scoping exists by design (Trello-style team board). `addTask`/`moveTask` are intentionally wide-open to any authenticated user, not an oversight.
+
 ## DevOps & Deployment
 
 - [ ] Configure CI pipeline (GitHub Actions) to run `bun run lint`, `bun run typecheck`, and `bun run build`
