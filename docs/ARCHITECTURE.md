@@ -6,10 +6,11 @@ TanStack Start meta-framework with Vite 7, React 19, and Nitro for production bu
 
 ## Data Flow
 
-1. Route `loader` prefetches data via server functions (`createServerFn()`)
-2. Server functions use dynamic imports to access the DB layer (keeps `postgres` driver out of client bundle)
-3. Client consumes data via `useSuspenseQuery` / `useQuery`
-4. Mutations invalidate React Query cache for automatic refetch
+1. Route `loader` calls `queryClient.ensureQueryData(queryOptions(filters))` with `ssr: 'data-only'` so data is prefetched on the server.
+2. Server functions (`createServerFn()`) run on the server and use dynamic `import()` to reach the DB layer (keeps the `postgres` driver out of the client bundle).
+3. `@tanstack/react-router-ssr-query` dehydrates the prefetched query cache into the HTML; the client rehydrates it via `setupRouterSsrQueryIntegration({ router, queryClient })`.
+4. Components consume the hydrated cache with `useQuery(queryOptions(...))` — no refetch on first paint because the key matches the dehydrated entry.
+5. Mutations invalidate the React Query cache for automatic refetch.
 
 ## Directory Structure
 
