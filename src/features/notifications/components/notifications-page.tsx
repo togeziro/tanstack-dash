@@ -7,6 +7,7 @@ import { useRouter } from '@tanstack/react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { notificationListQueryOptions } from '../api/queries';
 import { markAsReadMutation, markAllAsReadMutation } from '../api/mutations';
+import type { NotificationItem } from '../api/types';
 
 const actionRoutes: Record<string, string> = {
   view: '/dashboard/overview',
@@ -16,7 +17,8 @@ const actionRoutes: Record<string, string> = {
 };
 
 export default function NotificationsPage() {
-  const { data: notifications = [] } = useQuery(notificationListQueryOptions());
+  const { data } = useQuery(notificationListQueryOptions());
+  const notifications = ((data as any)?.notifications ?? []) as NotificationItem[];
   const { mutate: markAsRead } = useMutation(markAsReadMutation);
   const { mutate: markAllAsRead } = useMutation(markAllAsReadMutation);
   const router = useRouter();

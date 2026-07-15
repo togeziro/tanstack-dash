@@ -18,11 +18,14 @@ function toUser(betterUser: any) {
 }
 
 export async function getUsers(filters: UserFilters): Promise<UsersResponse> {
+  const { getRequestHeaders } = await import('@tanstack/react-start/server');
+  const headers = getRequestHeaders();
   const page = filters.page ?? 1;
   const limit = filters.limit ?? 10;
   const offset = (page - 1) * limit;
 
   const result: any = await auth.api.listUsers({
+    headers,
     query: { limit, offset, sortBy: filters.sort || 'createdAt' }
   });
 
@@ -51,7 +54,9 @@ export async function createUser(data: UserMutationPayload) {
 }
 
 export async function updateUser(id: number, data: UserMutationPayload) {
-  const usersList: any = await auth.api.listUsers({ query: { limit: 1 } });
+  const { getRequestHeaders } = await import('@tanstack/react-start/server');
+  const headers = getRequestHeaders();
+  const usersList: any = await auth.api.listUsers({ headers, query: { limit: 1 } });
   if (!usersList.users?.length) {
     return { success: false, message: `User with ID ${id} not found` };
   }
@@ -71,7 +76,9 @@ export async function updateUser(id: number, data: UserMutationPayload) {
 }
 
 export async function deleteUser(id: number) {
-  const usersList: any = await auth.api.listUsers({ query: { limit: 1 } });
+  const { getRequestHeaders } = await import('@tanstack/react-start/server');
+  const headers = getRequestHeaders();
+  const usersList: any = await auth.api.listUsers({ headers, query: { limit: 1 } });
   if (!usersList.users?.length) {
     return { success: false, message: `User with ID ${id} not found` };
   }
