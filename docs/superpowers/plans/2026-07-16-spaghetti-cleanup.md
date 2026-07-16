@@ -17,6 +17,7 @@
 - All category values must use the canonical `'Electronics'` / `'Furniture'` / `'Clothing'` / `'Toys'` / `'Groceries'` / `'Books'` / `'Jewelry'` / `'Beauty Products'` strings from `features/products/constants/product-options.ts`.
 
 ---
+
 ## File Structure
 
 After this plan:
@@ -58,16 +59,19 @@ src/
 ```
 
 ---
+
 ---
 
 ### Task 1: AuthShell component (Pass A)
 
 **Files:**
+
 - Create: `src/features/auth/components/auth-shell.tsx`
 - Modify: `src/features/auth/components/sign-in-view.tsx`
 - Modify: `src/features/auth/components/sign-up-view.tsx`
 
 **Interfaces:**
+
 - Consumes: props `title: string`, `subtitle: string`, `footerLinkText: string`, `footerLinkTo: string`, `children: React.ReactNode`
 - Produces: `<AuthShell>` component used by sign-in/sign-up views
 
@@ -108,9 +112,7 @@ export default function AuthShell({
       </div>
 
       <div className='flex w-full items-center justify-center bg-background p-8 lg:w-2/3'>
-        <div className='w-full max-w-md space-y-10 py-24 lg:py-32'>
-          {children}
-        </div>
+        <div className='w-full max-w-md space-y-10 py-24 lg:py-32'>{children}</div>
       </div>
     </div>
   );
@@ -218,14 +220,17 @@ git commit -m "refactor(auth): extract shared AuthShell for v1 sign-in/sign-up"
 ```
 
 ---
+
 ### Task 2: AuthCard component (Pass A)
 
 **Files:**
+
 - Create: `src/features/auth/components/auth-card.tsx`
 - Modify: `src/routes/auth/v2/sign-in/index.tsx`
 - Modify: `src/routes/auth/v2/sign-up/index.tsx`
 
 **Interfaces:**
+
 - Consumes: props `title: string`, `subtitle: string`, `linkLabel: string`, `linkTo: string`, `linkText: string`, `children: React.ReactNode`
 - Produces: `<AuthCard>` component used by v2 sign-in/sign-up routes
 
@@ -374,15 +379,18 @@ git commit -m "refactor(auth): extract shared AuthCard for v2 sign-in/sign-up"
 ```
 
 ---
+
 ### Task 3: Product schema + category dedup (Pass B)
 
 **Files:**
+
 - Modify: `src/features/forms/components/multi-step-product-form.tsx`
 - Modify: `src/features/forms/components/sheet-product-form.tsx`
 - Modify: `src/features/forms/components/sheet-form-demo.tsx`
 - Read-only (no changes): `src/features/products/schemas/product.ts`, `src/features/products/constants/product-options.ts`
 
 **Interfaces:**
+
 - Consumes: `productSchema` (z.ZodObject) from `features/products/schemas/product.ts`; `categoryOptions` from `features/products/constants/product-options.ts`
 - Produces: No new exports — just updated imports in consumer files
 
@@ -471,10 +479,24 @@ Current imports (lines 1–23) and inline schema (lines 25–30):
 import { useAppForm } from '@/components/ui/tanstack-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Icons } from '@/components/icons';
 import { useState } from 'react';
 
@@ -492,10 +514,24 @@ Replace with:
 import { useAppForm } from '@/components/ui/tanstack-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Icons } from '@/components/icons';
 import { useState } from 'react';
 import { productSchema } from '@/features/products/schemas/product';
@@ -508,10 +544,10 @@ Then find and remove the `as any` cast on line 44:
 
 ```tsx
 // BEFORE (line 44):
-onSubmit: productSchema as any
+onSubmit: productSchema as any;
 
 // AFTER:
-onSubmit: productSchema
+onSubmit: productSchema;
 ```
 
 - [ ] **Step 3: Update `src/features/forms/components/sheet-form-demo.tsx`**
@@ -538,14 +574,17 @@ git commit -m "refactor(forms): import canonical productSchema + categoryOptions
 ```
 
 ---
+
 ### Task 4: GitHub stars button cleanup (Pass C)
 
 **Files:**
+
 - Create: `src/lib/github.ts`
 - Modify: `src/components/github-stars-button.tsx`
 - Modify: `src/components/icons.tsx`
 
 **Interfaces:**
+
 - Consumes: `fetchGitHubRepo(owner, repo)` and `formatCount(count)` from `lib/github.ts`
 - Produces: `GitHubIcon` added to `icons.tsx`
 
@@ -557,10 +596,7 @@ export interface GitHubRepo {
   stars: number;
 }
 
-export async function fetchGitHubRepo(
-  owner: string,
-  repo: string
-): Promise<GitHubRepo | null> {
+export async function fetchGitHubRepo(owner: string, repo: string): Promise<GitHubRepo | null> {
   try {
     const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
       headers: { Accept: 'application/vnd.github.v3+json' }
@@ -568,7 +604,8 @@ export async function fetchGitHubRepo(
     if (!response.ok) return null;
     const data: unknown = await response.json();
     if (
-      typeof data === 'object' && data !== null &&
+      typeof data === 'object' &&
+      data !== null &&
       typeof (data as Record<string, unknown>).full_name === 'string' &&
       typeof (data as Record<string, unknown>).stargazers_count === 'number'
     ) {
@@ -608,7 +645,8 @@ function GitHubIcon({
   iconStyle?: 'currentColor' | 'github' | 'copilot' | 'muted';
   className?: string;
 }) {
-  const fill = iconStyle === 'currentColor' ? 'currentColor' : iconStyle === 'github' ? '#fff' : '#8b5cf6';
+  const fill =
+    iconStyle === 'currentColor' ? 'currentColor' : iconStyle === 'github' ? '#fff' : '#8b5cf6';
   return (
     <svg
       viewBox='0 0 16 16'
@@ -709,12 +747,18 @@ function GitHubStarsButton({
         setError(true);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [owner, repo]);
 
   if (error || stars === null) {
     return (
-      <button className={cn(githubStarsButtonVariants({ variant, size }), className)} disabled {...props}>
+      <button
+        className={cn(githubStarsButtonVariants({ variant, size }), className)}
+        disabled
+        {...props}
+      >
         <Icons.github className='mr-2 size-4' />
         {error ? 'Error' : '...'}
       </button>
@@ -746,9 +790,11 @@ git commit -m "refactor(github): move fetch/formatCount to lib/github.ts, add Gi
 ```
 
 ---
+
 ### Task 5: Dead useEffect + filter trigger (Pass D — quick wins)
 
 **Files:**
+
 - Modify: `src/components/layout/app-sidebar.tsx`
 - Create: `src/components/ui/filter-trigger.tsx`
 - Modify: `src/components/ui/data-table-faceted-filter.tsx`
@@ -756,6 +802,7 @@ git commit -m "refactor(github): move fetch/formatCount to lib/github.ts, add Gi
 - Modify: `src/components/ui/data-table-slider-filter.tsx`
 
 **Interfaces:**
+
 - Produces: `<FilterTrigger>` shared component
 
 - [ ] **Step 1: Delete dead useEffect in `app-sidebar.tsx`**
@@ -763,9 +810,9 @@ git commit -m "refactor(github): move fetch/formatCount to lib/github.ts, add Gi
 In `src/components/layout/app-sidebar.tsx`, remove lines 40–42:
 
 ```tsx
-  React.useEffect(() => {
-    // Side effects based on sidebar state changes
-  }, [isOpen]);
+React.useEffect(() => {
+  // Side effects based on sidebar state changes
+}, [isOpen]);
 ```
 
 Also verify `isOpen` (line 36) is used elsewhere in the file. If it's only set but never read after removing the effect, remove the `useMediaQuery` import and line 36.
@@ -821,14 +868,17 @@ git commit -m "refactor: delete dead useEffect in sidebar, extract shared Filter
 ```
 
 ---
+
 ### Task 6: Auth field boilerplate reduction (Pass D)
 
 **Files:**
+
 - Create: `src/components/forms/fields/password-field.tsx`
 - Modify: `src/features/auth/components/register-form.tsx`
 - Modify: `src/features/auth/components/user-auth-form.tsx`
 
 **Interfaces:**
+
 - Consumes: TanStack Form `field` API passed as a prop (`{ name, state, handleChange, handleBlur }`)
 - Produces: `<PasswordField>` component that collapses the eye-toggle + `Input` + `FieldError` scaffold
 
@@ -868,7 +918,14 @@ interface PasswordFieldProps {
   autoComplete?: string;
 }
 
-export function PasswordField({ field, show, onToggle, label, loading, autoComplete }: PasswordFieldProps) {
+export function PasswordField({
+  field,
+  show,
+  onToggle,
+  label,
+  loading,
+  autoComplete
+}: PasswordFieldProps) {
   return (
     <field.FieldSet>
       <field.Field>
@@ -913,19 +970,19 @@ export function PasswordField({ field, show, onToggle, label, loading, autoCompl
 Replace lines 76–113 (the `form.AppField name='password'` block) with:
 
 ```tsx
-        <form.AppField
-          name='password'
-          children={(field) => (
-            <PasswordField
-              field={field}
-              show={showPassword}
-              onToggle={() => setShowPassword(!showPassword)}
-              label='Password'
-              loading={loading}
-              autoComplete='current-password'
-            />
-          )}
-        />
+<form.AppField
+  name='password'
+  children={(field) => (
+    <PasswordField
+      field={field}
+      show={showPassword}
+      onToggle={() => setShowPassword(!showPassword)}
+      label='Password'
+      loading={loading}
+      autoComplete='current-password'
+    />
+  )}
+/>
 ```
 
 - [ ] **Step 3: Update `register-form.tsx` password blocks**
@@ -948,25 +1005,29 @@ git commit -m "refactor(auth): extract PasswordField to collapse repeated auth p
 ```
 
 ---
+
 ### Task 7: use-data-table refactor (Pass D)
 
 **Files:**
+
 - Modify: `src/hooks/use-data-table.ts`
 - Modify: `src/lib/parsers.ts`
 
 **Interfaces:**
+
 - Consumes: existing `ARRAY_SEPARATOR` (from `parsers.ts` or a config), column definitions
 - Produces: pure helpers `parseFilterValuesFromSearch` and `buildFilterSearchParams` in `parsers.ts`
 
 **Context (verified current code):**
+
 - `lib/parsers.ts` already exports `parseFiltersState` / `serializeFiltersState` (Zod-based, for the
-  *advanced* filter JSON encoding) and `parseSortingState` / `serializeSortingState`. These are
-  DIFFERENT from the *search-param* filter parsing done inside `use-data-table.ts` for the
+  _advanced_ filter JSON encoding) and `parseSortingState` / `serializeSortingState`. These are
+  DIFFERENT from the _search-param_ filter parsing done inside `use-data-table.ts` for the
   non-advanced (`enableAdvancedFilter === false`) path.
 - `use-data-table.ts` duplicates the comma `ARRAY_SEPARATOR` split/join logic:
   - read: line 162 `val.split(ARRAY_SEPARATOR)`
   - write: line 182 `value.join(ARRAY_SEPARATOR)`
-  This should live in `parsers.ts` alongside the other filter helpers.
+    This should live in `parsers.ts` alongside the other filter helpers.
 
 - [ ] **Step 1: Confirm `ARRAY_SEPARATOR` location**
 
@@ -1056,15 +1117,18 @@ git commit -m "refactor: extract search-param filter parse/build helpers from us
 ```
 
 ---
+
 ### Task 8: infobar.tsx split (Pass D)
 
 **Files:**
+
 - Create: `src/components/ui/infobar-context.tsx`
 - Modify: `src/components/ui/infobar.tsx` (shell only)
 - Create: `src/components/ui/infobar-sheet.tsx`
 - Create: `src/components/ui/infobar-menu.tsx`
 
 **Interfaces:**
+
 - Produces: 4 focused files; `infobar.tsx` re-exports everything for backward compatibility
 
 - [ ] **Step 1: Create `src/components/ui/infobar-context.tsx`**
@@ -1098,11 +1162,42 @@ Re-export all of these from the split modules. For example (adjust paths to matc
 actually lands):
 
 ```tsx
-export { Infobar, InfobarContent, InfobarFooter, InfobarHeader, InfobarInput, InfobarInset, InfobarRail, InfobarSeparator, InfobarTrigger } from './infobar-shell';
-export { InfobarProvider, useInfobar, type HelpfulLink, type DescriptiveSection, type InfobarContent as InfobarContentType } from './infobar-context';
+export {
+  Infobar,
+  InfobarContent,
+  InfobarFooter,
+  InfobarHeader,
+  InfobarInput,
+  InfobarInset,
+  InfobarRail,
+  InfobarSeparator,
+  InfobarTrigger
+} from './infobar-shell';
+export {
+  InfobarProvider,
+  useInfobar,
+  type HelpfulLink,
+  type DescriptiveSection,
+  type InfobarContent as InfobarContentType
+} from './infobar-context';
 export { InfobarSheet } from './infobar-sheet';
-export { InfobarMenu, InfobarMenuAction, InfobarMenuBadge, InfobarMenuButton, InfobarMenuItem, InfobarMenuSkeleton, InfobarMenuSub, InfobarMenuSubButton, InfobarMenuSubItem } from './infobar-menu';
-export { InfobarGroup, InfobarGroupAction, InfobarGroupContent, InfobarGroupLabel } from './infobar-group';
+export {
+  InfobarMenu,
+  InfobarMenuAction,
+  InfobarMenuBadge,
+  InfobarMenuButton,
+  InfobarMenuItem,
+  InfobarMenuSkeleton,
+  InfobarMenuSub,
+  InfobarMenuSubButton,
+  InfobarMenuSubItem
+} from './infobar-menu';
+export {
+  InfobarGroup,
+  InfobarGroupAction,
+  InfobarGroupContent,
+  InfobarGroupLabel
+} from './infobar-group';
 ```
 
 > Keep the exact public export names identical so no importer breaks. After splitting, run
@@ -1122,15 +1217,18 @@ git commit -m "refactor(ui): split infobar.tsx into context, shell, sheet, and m
 ```
 
 ---
+
 ### Task 9: demo-form.tsx inline fields extraction (Pass D)
 
 **Files:**
+
 - Modify: `src/components/forms/demo-form.tsx`
 - Create: `src/components/forms/fields/combobox-field.tsx`
 - Create: `src/components/forms/fields/tags-field.tsx`
 - Create: `src/components/forms/fields/section-title.tsx`
 
 **Interfaces:**
+
 - Produces: reusable field components extracted from inline demo-form definitions
 
 - [ ] **Step 1: Read inline field components in `demo-form.tsx`**
@@ -1159,12 +1257,15 @@ git commit -m "refactor: extract inline demo-form fields into reusable component
 ```
 
 ---
+
 ### Task 10: db/products.ts helper (Pass D)
 
 **Files:**
+
 - Modify: `src/lib/db/products.ts`
 
 **Interfaces:**
+
 - Consumes: existing `ProductByIdResponse`, `serialize`, `mapDbError`, `eq`, `products`, `db`
 - Produces: `getProductOr404(id)` helper
 

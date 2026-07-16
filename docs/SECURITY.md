@@ -12,9 +12,10 @@ These guarantees hold for reads and mutations across all four features (products
 
 > **Tracked, not yet fixed.** The `notifications` table has no `user_id` column, so any authenticated user can read (`getNotifications`), mark-read (`markAsRead`), delete (`removeNotification`), or mark-all-read (`markAllAsRead`) any other user's notifications via id-guessing or the unscoped `getNotifications`/`markAllAsRead` calls.
 >
-> `requireSession()` closes the *unauthenticated* gap but does **not** close this *authorization* gap — "authenticated" is not "authorized" for per-resource ownership.
+> `requireSession()` closes the _unauthenticated_ gap but does **not** close this _authorization_ gap — "authenticated" is not "authorized" for per-resource ownership.
 
 **Required fix (deferred to its own review):**
+
 - Schema migration adding `user_id` (nullable during backfill, since seed/system notifications have no owner).
 - Thread `session.user.id` through `addNotification` call sites.
 - Add a `WHERE user_id = ?` clause on the four read/write functions.
