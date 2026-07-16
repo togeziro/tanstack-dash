@@ -10,33 +10,21 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useFormStepper } from '@/hooks/use-stepper';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { productSchema } from '@/features/products/schemas/product';
+import { categoryOptions } from '@/features/products/constants/product-options';
 
 // --- Schema ---
 
-const productFormSchema = z.object({
-  name: z.string().min(2, 'Product name must be at least 2 characters'),
-  category: z.string().min(1, 'Please select a category'),
-  price: z.number().min(0.01, 'Price must be greater than 0'),
-  description: z.string().min(10, 'Description must be at least 10 characters')
-});
-
 const stepSchemas = [
   // Step 1: Basic Info
-  productFormSchema.pick({ name: true, category: true, price: true }),
+  productSchema.pick({ name: true, category: true, price: true }),
   // Step 2: Details
-  productFormSchema.pick({ description: true }),
+  productSchema.pick({ description: true }),
   // Step 3: Review (no validation)
   z.object({})
 ];
 
 // --- Step Groups ---
-
-const categoryOptions = [
-  { value: 'beauty', label: 'Beauty Products' },
-  { value: 'electronics', label: 'Electronics' },
-  { value: 'home', label: 'Home & Garden' },
-  { value: 'sports', label: 'Sports & Outdoors' }
-];
 
 const Step1Group = withFieldGroup({
   defaultValues: {
@@ -187,7 +175,7 @@ export default function MultiStepProductForm() {
     } as ProductFormValues,
     validationLogic: revalidateLogic(),
     validators: {
-      onDynamic: currentValidator as typeof productFormSchema,
+      onDynamic: currentValidator as typeof productSchema,
       onDynamicAsyncDebounceMs: 500
     },
     onSubmit: () => {

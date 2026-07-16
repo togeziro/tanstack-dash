@@ -1,5 +1,4 @@
 import { useAppForm } from '@/components/ui/tanstack-form';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -21,13 +20,8 @@ import {
 } from '@/components/ui/select';
 import { Icons } from '@/components/icons';
 import { useState } from 'react';
-
-const productSchema = z.object({
-  name: z.string().min(2, 'Product name must be at least 2 characters'),
-  category: z.string().min(1, 'Please select a category'),
-  price: z.number().min(0.01, 'Price must be greater than 0'),
-  description: z.string().min(10, 'Description must be at least 10 characters')
-});
+import { productSchema } from '@/features/products/schemas/product';
+import { categoryOptions } from '@/features/products/constants/product-options';
 
 export default function SheetProductForm() {
   const [open, setOpen] = useState(false);
@@ -40,8 +34,7 @@ export default function SheetProductForm() {
       description: ''
     },
     validators: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TanStack Form validator type mismatch with Zod
-      onSubmit: productSchema as any
+      onSubmit: productSchema
     },
     onSubmit: () => {
       alert('Product created successfully!');
@@ -108,10 +101,11 @@ export default function SheetProductForm() {
                             <SelectValue placeholder='Select category' />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value='beauty'>Beauty Products</SelectItem>
-                            <SelectItem value='electronics'>Electronics</SelectItem>
-                            <SelectItem value='home'>Home & Garden</SelectItem>
-                            <SelectItem value='sports'>Sports & Outdoors</SelectItem>
+                            {categoryOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </field.Field>

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/components/icons';
+import { categoryOptions } from '@/features/products/constants/product-options';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,17 +40,6 @@ type DialogFormValues = {
   rating: number;
   feedback: string;
 };
-
-// ---------------------------------------------------------------------------
-// Options
-// ---------------------------------------------------------------------------
-
-const categoryOptions = [
-  { value: 'beauty', label: 'Beauty Products' },
-  { value: 'electronics', label: 'Electronics' },
-  { value: 'home', label: 'Home & Garden' },
-  { value: 'sports', label: 'Sports & Outdoors' }
-];
 
 // ---------------------------------------------------------------------------
 // Sheet Form
