@@ -31,6 +31,7 @@ import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { ComboboxField, TagsField, SectionTitle } from './fields';
 
 // Schema (form-level safety net — onSubmit catches anything field-level missed)
 const demoFormSchema = z.object({
@@ -91,139 +92,6 @@ const genderOptions = [
   { value: 'other', label: 'Other' },
   { value: 'prefer-not-to-say', label: 'Prefer not to say' }
 ];
-
-// ─── Custom field components (no pre-built field component exists) ───
-
-function ComboboxField({
-  value,
-  onChange,
-  onBlur,
-  isTouched,
-  isValid
-}: {
-  value: string;
-  onChange: (val: string) => void;
-  onBlur: () => void;
-  isTouched: boolean;
-  isValid: boolean;
-}) {
-  const [open, setOpen] = React.useState(false);
-  const selected = frameworkOptions.find((o) => o.value === value);
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant='outline'
-          role='combobox'
-          aria-controls='framework-listbox'
-          aria-expanded={open}
-          className='w-full justify-between font-normal'
-          aria-invalid={isTouched && !isValid}
-          onBlur={onBlur}
-        >
-          {selected?.label ?? 'Search frameworks...'}
-          <Icons.chevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className='w-[--radix-popover-trigger-width] p-0'>
-        <Command>
-          <CommandInput placeholder='Search...' />
-          <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
-            <CommandGroup>
-              {frameworkOptions.map((opt) => (
-                <CommandItem
-                  key={opt.value}
-                  value={opt.value}
-                  onSelect={(val) => {
-                    onChange(val);
-                    setOpen(false);
-                  }}
-                >
-                  <Icons.check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      value === opt.value ? 'opacity-100' : 'opacity-0'
-                    )}
-                  />
-                  {opt.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function TagsField({
-  values,
-  onPush,
-  onRemove
-}: {
-  values: string[];
-  onPush: (val: string) => void;
-  onRemove: (idx: number) => void;
-}) {
-  const [tagInput, setTagInput] = React.useState('');
-
-  const addTag = () => {
-    const tag = tagInput.trim();
-    if (tag && !values.includes(tag)) {
-      onPush(tag);
-      setTagInput('');
-    }
-  };
-
-  return (
-    <>
-      <div className='flex gap-2'>
-        <Input
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              addTag();
-            }
-          }}
-          placeholder='Type and press Enter...'
-        />
-        <Button type='button' variant='secondary' onClick={addTag}>
-          Add
-        </Button>
-      </div>
-      {values.length > 0 && (
-        <div className='flex flex-wrap gap-2'>
-          {values.map((tag, idx) => (
-            <Badge key={tag} variant='secondary' className='gap-1'>
-              {tag}
-              <button
-                type='button'
-                onClick={() => onRemove(idx)}
-                className='hover:text-destructive ml-0.5'
-              >
-                <Icons.close className='h-3 w-3' />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-    </>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className='space-y-1'>
-      <Separator />
-      <h3 className='text-muted-foreground pt-2 text-sm font-medium tracking-wide uppercase'>
-        {children}
-      </h3>
-    </div>
-  );
-}
 
 // ─── Form ───
 
@@ -436,6 +304,7 @@ export default function DemoForm() {
                           onBlur={field.handleBlur}
                           isTouched={field.state.meta.isTouched}
                           isValid={field.state.meta.isValid}
+                          frameworkOptions={frameworkOptions}
                         />
                         <FieldDescription>Searchable dropdown</FieldDescription>
                       </field.Field>
