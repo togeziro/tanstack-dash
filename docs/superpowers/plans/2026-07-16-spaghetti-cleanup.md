@@ -1325,3 +1325,25 @@ Expected: All pass.
 git add src/lib/db/products.ts
 git commit -m "refactor(db): add getProductOr404 helper, deduplicate load-row preamble in update/delete"
 ```
+
+---
+
+## Implementation Notes (actual vs plan)
+
+- **Task 4 (GitHub button):** The plan draft proposed converting the async Server Component to a
+  `'use client'` button with local state + Suspense. The implemented version kept the component as
+  an async Server Component and only relocated `fetchGitHubRepo`/`formatCount` (to `lib/github.ts`)
+  and `GitHubIcon`/`IconStyle` (to `components/icons.tsx`). This matches the spec's stated goal
+  ("move fetch + formatCount + icon + cva into separate files") and is a faithful refactor. A
+  client/Suspense conversion remains a possible follow-up if render-time fetch becomes a concern.
+- **Task 8 (infobar split):** The plan's illustrative re-export used `./infobar-shell` and an
+  `InfobarSheet` export. The actual implementation kept the shell inside `infobar.tsx` itself and
+  placed the trigger in `infobar-sheet.tsx` exported as `InfobarTrigger`. The actual public API
+  (all 24 values + 3 types) matches the binding spec exactly — the naming difference is cosmetic.
+- **Task 6 (PasswordField):** uses `field: any` (pragmatic for a refactor of existing working code);
+  could be tightened to a real `FieldApi` type later if desired.
+- **Task 3 (product schema dedup):** delivered the latent-bug fix — demo `categoryOptions` now use
+  the canonical uppercase enum values (`Electronics`, etc.) matching `product-options.ts` and the DB
+  enum, removing the prior lowercase literals (`electronics`, `beauty`).
+- All tasks: `bun run typecheck`/`lint` pass. Unit tests green except one pre-existing unrelated
+  DB seed-count failure in `src/lib/db/products.test.ts` that also fails on the clean tree.
