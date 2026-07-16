@@ -1083,13 +1083,30 @@ Move the `InfobarMenu`, `InfobarGroup`, `InfobarMenuItem` sub-components into th
 
 Keep only the main `Infobar` shell component that assembles the sidebar shell. Import from the new sub-files.
 
-At the bottom, add a re-export block so existing imports from `infobar.tsx` still work:
+At the bottom, add a re-export block so existing imports from `infobar.tsx` still work. The full
+current export list (infobar.tsx:730–755) is:
+
+```
+Infobar, InfobarContent, InfobarFooter, InfobarGroup, InfobarGroupAction,
+InfobarGroupContent, InfobarGroupLabel, InfobarHeader, InfobarInput, InfobarInset,
+InfobarMenu, InfobarMenuAction, InfobarMenuBadge, InfobarMenuButton, InfobarMenuItem,
+InfobarMenuSkeleton, InfobarMenuSub, InfobarMenuSubButton, InfobarMenuSubItem,
+InfobarProvider, InfobarRail, InfobarSeparator, InfobarTrigger, useInfobar
+```
+
+Re-export all of these from the split modules. For example (adjust paths to match where each symbol
+actually lands):
 
 ```tsx
-export { InfobarProvider, useInfobar } from './infobar-context';
+export { Infobar, InfobarContent, InfobarFooter, InfobarHeader, InfobarInput, InfobarInset, InfobarRail, InfobarSeparator, InfobarTrigger } from './infobar-shell';
+export { InfobarProvider, useInfobar, type HelpfulLink, type DescriptiveSection, type InfobarContent as InfobarContentType } from './infobar-context';
 export { InfobarSheet } from './infobar-sheet';
-export { InfobarMenu, InfobarGroup, InfobarMenuItem } from './infobar-menu';
+export { InfobarMenu, InfobarMenuAction, InfobarMenuBadge, InfobarMenuButton, InfobarMenuItem, InfobarMenuSkeleton, InfobarMenuSub, InfobarMenuSubButton, InfobarMenuSubItem } from './infobar-menu';
+export { InfobarGroup, InfobarGroupAction, InfobarGroupContent, InfobarGroupLabel } from './infobar-group';
 ```
+
+> Keep the exact public export names identical so no importer breaks. After splitting, run
+> `bun run typecheck` to confirm every downstream import still resolves.
 
 - [ ] **Step 5: Run unit tests and lint**
 
