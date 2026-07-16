@@ -1,47 +1,37 @@
-import { IconCommand } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import AuthShell from './auth-shell';
 import UserAuthForm from './user-auth-form';
 
 export default function SignInViewPage() {
   return (
-    <div className='flex h-dvh'>
-      <div className='hidden bg-primary lg:block lg:w-1/3'>
-        <div className='flex h-full flex-col items-center justify-center p-12 text-center'>
-          <div className='space-y-6'>
-            <IconCommand className='mx-auto size-12 text-primary-foreground' />
-            <div className='space-y-2'>
-              <h1 className='font-light text-5xl text-primary-foreground'>Hello again</h1>
-              <p className='text-primary-foreground/80 text-xl'>Login to continue</p>
-            </div>
+    <AuthShell
+      title='Hello again'
+      subtitle='Login to continue'
+      footerLinkText="Don't have an account?"
+      footerLinkTo='/auth/sign-up'
+      linkLabel='Register'
+    >
+      <div className='space-y-4'>
+        <div className='space-y-4 text-center'>
+          <div className='font-medium tracking-tight'>Login</div>
+          <div className='mx-auto max-w-xl text-muted-foreground'>
+            Welcome back. Enter your email and password, let&apos;s hope you remember them this
+            time.
           </div>
         </div>
-      </div>
-
-      <div className='flex w-full items-center justify-center bg-background p-8 lg:w-2/3'>
-        <div className='w-full max-w-md space-y-10 py-24 lg:py-32'>
-          <div className='space-y-4 text-center'>
-            <div className='font-medium tracking-tight'>Login</div>
-            <div className='mx-auto max-w-xl text-muted-foreground'>
-              Welcome back. Enter your email and password, let&apos;s hope you remember them this
-              time.
-            </div>
-          </div>
-          <div className='space-y-4'>
-            <UserAuthForm />
-            <Button variant='outline' className='w-full' type='button' disabled>
-              <IconCommand className='mr-2 size-4' />
-              Continue with Google
-            </Button>
-            <p className='text-center text-muted-foreground text-xs'>
-              Don&apos;t have an account?{' '}
-              <Link to='/auth/sign-up' className='text-primary'>
-                Register
-              </Link>
-            </p>
-          </div>
+        <div className='space-y-4'>
+          <UserAuthForm />
+          <Button variant='outline' className='w-full' type='button' disabled>
+            Login with Google
+          </Button>
+          <p className='text-center text-muted-foreground text-xs'>
+            <Link to='/auth/sign-up' className='text-primary'>
+              Register
+            </Link>
+          </p>
         </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }
