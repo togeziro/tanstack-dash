@@ -214,17 +214,21 @@ bun run build
 bun run start
 ```
 
+## Security
+
+The server-function RPC boundary is hardened (auth at the boundary, Zod input validation, mapped DB errors). For the full details and the one known gap (notification IDOR — tracked, not yet fixed), see [docs/SECURITY.md](./docs/SECURITY.md).
+
 ## Key Differences from Next.js Version
 
-| Concept       | Next.js                                 | TanStack Start                                   |
-| ------------- | --------------------------------------- | ------------------------------------------------ |
-| Routing       | App Router (`app/`)                     | File-based (`routes/`) with type-safe params     |
-| Data Fetching | Server Components + `HydrationBoundary` | Route `loader` + `useSuspenseQuery`              |
-| Layouts       | `layout.tsx` nesting                    | Layout routes with `<Outlet />`                  |
-| Server Code   | `'use server'` actions                  | `createServerFn()`                               |
-| Build Tool    | Webpack/Turbopack                       | Vite                                             |
-| Deployment    | `next start`                            | Nitro (any platform)                             |
-| URL State     | nuqs                                    | TanStack Router `useSearch()` + `validateSearch` |
+| Concept       | Next.js                                 | TanStack Start                                                                                                                      |
+| ------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Routing       | App Router (`app/`)                     | File-based (`routes/`) with type-safe params                                                                                        |
+| Data Fetching | Server Components + `HydrationBoundary` | Route `loader` (`ensureQueryData`) dehydrated via `@tanstack/react-router-ssr-query`, consumed with `useQuery` / `useSuspenseQuery` |
+| Layouts       | `layout.tsx` nesting                    | Layout routes with `<Outlet />`                                                                                                     |
+| Server Code   | `'use server'` actions                  | `createServerFn()`                                                                                                                  |
+| Build Tool    | Webpack/Turbopack                       | Vite                                                                                                                                |
+| Deployment    | `next start`                            | Nitro (any platform)                                                                                                                |
+| URL State     | nuqs                                    | TanStack Router `useSearch()` + `validateSearch`                                                                                    |
 
 ### Support
 
