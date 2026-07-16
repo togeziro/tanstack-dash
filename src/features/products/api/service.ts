@@ -13,7 +13,6 @@ import { z } from 'zod';
 import { zodValidator } from '@tanstack/zod-adapter';
 import { requireRole } from '@/lib/auth/session';
 import { productFiltersSchema, productIdSchema, productMutationSchema } from './validation';
-import type { ProductMutationPayload } from './types';
 
 export const getProductsFn = createServerFn({ method: 'GET' })
   .validator(productFiltersSchema)

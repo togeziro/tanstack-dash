@@ -1,11 +1,4 @@
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle
-} from '@/components/ui/sheet';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import * as React from 'react';

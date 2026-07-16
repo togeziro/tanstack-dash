@@ -89,7 +89,14 @@ export async function getProducts(filters: ProductFilters): Promise<ProductsResp
       ? (filters.categories.filter((c): c is ProductCategory =>
           productCategoryEnum.enumValues.includes(c as ProductCategory)
         ) as ProductCategory[])
-      : [];
+      : filters.categories
+        ? (filters.categories
+            .split(',')
+            .map((c) => c.trim())
+            .filter((c): c is ProductCategory =>
+              productCategoryEnum.enumValues.includes(c as ProductCategory)
+            ) as ProductCategory[])
+        : [];
     const search = filters.search?.trim();
 
     const conditions = [];

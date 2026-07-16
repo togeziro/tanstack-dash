@@ -1,5 +1,4 @@
 import { createServerFn } from '@tanstack/react-start';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { requireSession } from '@/lib/auth/session';
 import { markAsReadSchema, removeNotificationSchema, addNotificationSchema } from './validation';
 import type { AddNotificationPayload } from './types';

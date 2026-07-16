@@ -21,8 +21,10 @@ const actionRoutes: Record<string, string> = {
 };
 
 export function NotificationCenter() {
-  const { data } = useQuery(notificationListQueryOptions());
-  const notifications = ((data as any)?.notifications ?? []) as NotificationItem[];
+  const { data } = useQuery(notificationListQueryOptions()) as {
+    data: { notifications: NotificationItem[] } | undefined;
+  };
+  const notifications = data?.notifications ?? [];
   const { mutate: markAsRead } = useMutation(markAsReadMutation);
   const { mutate: markAllAsRead } = useMutation(markAllAsReadMutation);
   const router = useRouter();

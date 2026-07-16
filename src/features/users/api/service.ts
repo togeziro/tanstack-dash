@@ -13,7 +13,6 @@ import { z } from 'zod';
 import { zodValidator } from '@tanstack/zod-adapter';
 import { requireRole } from '@/lib/auth/session';
 import { userFiltersSchema, userIdSchema, userMutationSchema } from './validation';
-import type { UserMutationPayload } from './types';
 
 export const getUsersFn = createServerFn({ method: 'GET' })
   .validator(userFiltersSchema)

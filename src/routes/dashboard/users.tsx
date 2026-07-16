@@ -8,7 +8,6 @@ import UserListingPage from '@/features/users/components/user-listing';
 import { usersQueryOptions } from '@/features/users/api/queries';
 import { parseSortingState } from '@/lib/parsers';
 import { cn } from '@/lib/utils';
-import { Icons } from '@/components/icons';
 import { UserFormSheetTrigger } from '@/features/users/components/user-form-sheet';
 import { usersInfoContent } from '@/features/users/info-content';
 

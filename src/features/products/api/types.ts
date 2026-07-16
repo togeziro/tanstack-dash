@@ -12,7 +12,7 @@ export type Product = {
 export type ProductFilters = {
   page?: number;
   limit?: number;
-  categories?: string;
+  categories?: string | string[];
   search?: string;
   sort?: string;
 };
