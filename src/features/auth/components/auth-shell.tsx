@@ -5,17 +5,22 @@ import { Button } from '@/components/ui/button';
 interface AuthShellProps {
   title: string;
   subtitle: string;
-  footerLinkText: string;
+  form: React.ReactNode;
+  googleButtonLabel: string;
+  footerPrefix: string;
   footerLinkTo: string;
-  linkLabel?: string;
+  footerLinkLabel: string;
   children: React.ReactNode;
 }
 
 export default function AuthShell({
   title,
   subtitle,
-  footerLinkText,
+  form,
+  googleButtonLabel,
+  footerPrefix,
   footerLinkTo,
+  footerLinkLabel,
   children
 }: AuthShellProps) {
   return (
@@ -33,7 +38,22 @@ export default function AuthShell({
       </div>
 
       <div className='flex w-full items-center justify-center bg-background p-8 lg:w-2/3'>
-        <div className='w-full max-w-md space-y-10 py-24 lg:py-32'>{children}</div>
+        <div className='w-full max-w-md space-y-10 py-24 lg:py-32'>
+          {children}
+          <div className='space-y-4'>
+            {form}
+            <Button variant='outline' className='w-full' type='button' disabled>
+              <IconCommand className='mr-2 size-4' />
+              {googleButtonLabel}
+            </Button>
+            <p className='text-center text-muted-foreground text-xs'>
+              {footerPrefix}{' '}
+              <Link to={footerLinkTo} className='text-primary'>
+                {footerLinkLabel}
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
