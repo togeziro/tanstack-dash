@@ -16,6 +16,7 @@ import { AreaGraph } from '@/features/overview/components/area-graph';
 import { PieGraph } from '@/features/overview/components/pie-graph';
 
 export const Route = createFileRoute('/dashboard/overview')({
+  ssr: 'data-only',
   component: OverviewPage
 });
 

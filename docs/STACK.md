@@ -13,15 +13,15 @@
 
 ## Routing & Data Fetching
 
-| Technology                        | Version   | Purpose                          |
-| --------------------------------- | --------- | -------------------------------- |
-| TanStack Router                   | v1.170.17 | File-based type-safe routing     |
-| TanStack Router DevTools          | v1.167.0  | Route dev tools                  |
-| TanStack React Query              | v5.101.2  | Server state / data fetching     |
-| TanStack React Query DevTools     | v5.101.2  | Query dev tools                  |
-| @tanstack/react-router-with-query | v1.130.17 | Router + Query bridge            |
-| @tanstack/router-plugin           | v1.168.19 | Vite plugin for route generation |
-| @tanstack/zod-adapter             | v1.167.0  | Zod validation for route params  |
+| Technology                       | Version   | Purpose                                       |
+| -------------------------------- | --------- | --------------------------------------------- |
+| TanStack Router                  | v1.170.17 | File-based type-safe routing                  |
+| TanStack Router DevTools         | v1.167.0  | Route dev tools                               |
+| TanStack React Query             | v5.101.2  | Server state / data fetching                  |
+| TanStack React Query DevTools    | v5.101.2  | Query dev tools                               |
+| @tanstack/react-router-ssr-query | v1.167.1  | Router + Query SSR bridge (dehydrate/hydrate) |
+| @tanstack/router-plugin          | v1.168.19 | Vite plugin for route generation              |
+| @tanstack/zod-adapter            | v1.167.0  | Zod validation for route params               |
 
 ## UI Components
 

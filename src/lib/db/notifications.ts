@@ -1,5 +1,6 @@
 import { desc, eq } from 'drizzle-orm';
 import { db } from './index';
+import { DomainError, mapDbError } from '../errors';
 import { notifications } from './schema/notifications';
 import type { NotificationAction } from '@/components/ui/notification-card';
 
@@ -24,22 +25,34 @@ function toNotification(row: typeof notifications.$inferSelect): NotificationRow
 }
 
 export async function getNotifications(): Promise<NotificationRow[]> {
-  const rows = await db.select().from(notifications).orderBy(desc(notifications.created_at));
-  return rows.map(toNotification);
+  try {
+    const rows = await db.select().from(notifications).orderBy(desc(notifications.created_at));
+    return rows.map(toNotification);
+  } catch (e) {
+    mapDbError(e, 'notifications.getNotifications');
+  }
 }
 
 export async function markAsRead(id: number) {
-  await db
-    .update(notifications)
-    .set({ status: 'read', updated_at: new Date() })
-    .where(eq(notifications.id, id));
+  try {
+    await db
+      .update(notifications)
+      .set({ status: 'read', updated_at: new Date() })
+      .where(eq(notifications.id, id));
+  } catch (e) {
+    mapDbError(e, 'notifications.markAsRead');
+  }
 }
 
 export async function markAllAsRead() {
-  await db
-    .update(notifications)
-    .set({ status: 'read', updated_at: new Date() })
-    .where(eq(notifications.status, 'unread'));
+  try {
+    await db
+      .update(notifications)
+      .set({ status: 'read', updated_at: new Date() })
+      .where(eq(notifications.status, 'unread'));
+  } catch (e) {
+    mapDbError(e, 'notifications.markAllAsRead');
+  }
 }
 
 export async function addNotification(data: {
@@ -47,22 +60,30 @@ export async function addNotification(data: {
   body: string;
   actions?: NotificationAction[];
 }) {
-  const [created] = await db
-    .insert(notifications)
-    .values({
-      title: data.title,
-      body: data.body,
-      actions: data.actions ?? null
-    })
-    .returning();
+  try {
+    const [created] = await db
+      .insert(notifications)
+      .values({
+        title: data.title,
+        body: data.body,
+        actions: data.actions ?? null
+      })
+      .returning();
 
-  if (!created) {
-    throw new Error('Failed to create notification');
+    if (!created) {
+      throw new DomainError('Failed to create notification');
+    }
+
+    return toNotification(created);
+  } catch (e) {
+    mapDbError(e, 'notifications.addNotification');
   }
-
-  return toNotification(created);
 }
 
 export async function removeNotification(id: number) {
-  await db.delete(notifications).where(eq(notifications.id, id));
+  try {
+    await db.delete(notifications).where(eq(notifications.id, id));
+  } catch (e) {
+    mapDbError(e, 'notifications.removeNotification');
+  }
 }

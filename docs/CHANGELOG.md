@@ -25,6 +25,15 @@
 
 - **Login 404/403** — Better Auth endpoints are multi-segment, so the API handler must be a catch-all splat route (`src/routes/api/auth/$.ts`); patched TanStack Start's `createStartHandler.js` so `server.handlers` fire on splat routes, with `scripts/postinstall.js` re-applying the patch after `bun install`.
 - **Better Auth "Invalid origin" 403** — `baseURL` now uses a dynamic `allowedHosts` + `protocol: 'auto'` config (replaces the hardcoded `http://localhost:3000`) so Caddy-served dev hosts pass the CSRF origin check.
+- **SSR restore (framework realignment)** — replaced the deprecated `@tanstack/react-router-with-query` (`v1.130.17`, incompatible with Router `v1.170.17`) with the official `@tanstack/react-router-ssr-query` (`v1.167.1`) and wired `setupRouterSsrQueryIntegration({ router, queryClient })` in `src/router.tsx`. Fixes the `isDehydrated` crash during SSR streaming.
+- **`Buffer is not defined` client crash** — the `postgres` driver was reaching the browser bundle; `vite.config.ts` now aliases `Buffer → 'buffer'` and defines `global → globalThis`.
+- **`data-theme="[object Object]"`** — `__root.tsx` loader now reads the active theme via `createServerOnlyFn` (imports `@tanstack/react-start/server` server-side only).
+- **Users page 500** — `getUsers`/`createUser`/`updateUser`/`deleteUser` now pass `getRequestHeaders()` into every `auth.api.*` admin call, fixing `Dynamic baseURL could not be resolved`.
+- **Notifications `filter is not a function`** — components now read `data?.notifications` (the query returns `NotificationsResponse`, not a bare array) and type it as `NotificationItem[]`.
+- **Auth middleware TS error** — `authMiddleware` is now `.server()`-only (removed the `.client()` chain).
+- **Data routes** — `product`, `users`, `kanban`, `notifications`, `overview` now use a `loader` that calls `queryClient.ensureQueryData(...)` with `ssr: 'data-only'`, so data prefetches on the server and hydrates on the client.
+
+All changes above are committed on `dev` (HEAD `1ed928a`).
 
 All notable changes to this project will be documented in this file.
 

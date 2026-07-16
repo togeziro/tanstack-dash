@@ -54,3 +54,7 @@ graphify-out/
 
 # Machine-installed git hooks (regenerated per-machine by `graphify hook install`)
 .husky/_/
+
+# Machine-local tooling artifacts
+.mimocode/
+.tanstack/tmp/
