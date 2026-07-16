@@ -18,30 +18,30 @@ A production-ready **admin dashboard starter** built with **TanStack Start** (Re
 
 | Layer   | Technology                                                                                              |
 | -------- | ------------------------------------------------------------------------------------------------------- |
-| Frontend (UI) | [React 19](https://react.dev), [TanStack Router](https://tanstack.com/router) (file-based, type-safe), [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev), [shadcn/ui](https://ui.shadcn.com), [Tailwind CSS v4](https://tailwindcss.com), [Recharts](https://recharts.org), [motion](https://motion.dev), [kbar](https://kbar.vercel.app/) |
-| Middle (server runtime & data) | [TanStack Start](https://tanstack.com/start) on [Vite 7](https://vite.dev) + [Nitro](https://nitro.build), [TanStack React Query](https://tanstack.com/query) with SSR dehydration via `@tanstack/react-router-ssr-query`, `createServerFn()` RPC boundary, server-side prefetch via route `loader` + `ensureQueryData({ ssr: 'data-only' })`, [Better Auth](https://better-auth.com) session + RBAC middleware |
-| Backend (data & persistence) | [PostgreSQL](https://www.postgresql.org) + [Drizzle ORM](https://orm.drizzle.team) (`postgres` driver), Better Auth DB-session store, server-only data-access layer with Zod-validated inputs and mapped DB errors, Nitro deploy presets (Vercel / Cloudflare / Node.js) |
+| <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> Frontend (UI) | [React 19](https://react.dev), [TanStack Router](https://tanstack.com/router) (file-based, type-safe), [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev), [shadcn/ui](https://ui.shadcn.com), [Tailwind CSS v4](https://tailwindcss.com), [Recharts](https://recharts.org), [motion](https://motion.dev), [kbar](https://kbar.vercel.app/) |
+| <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> Middle (server runtime & data) | [TanStack Start](https://tanstack.com/start) on [Vite 7](https://vite.dev) + [Nitro](https://nitro.build), [TanStack React Query](https://tanstack.com/query) with SSR dehydration via `@tanstack/react-router-ssr-query`, `createServerFn()` RPC boundary, server-side prefetch via route `loader` + `ensureQueryData({ ssr: 'data-only' })`, [Better Auth](https://better-auth.com) session + RBAC middleware |
+| <img src="https://avatars.githubusercontent.com/u/82585676?s=48&v=4" width="16" height="16" align="absmiddle" alt="PostgreSQL" /> Backend (data & persistence) | [PostgreSQL](https://www.postgresql.org) + [Drizzle ORM](https://orm.drizzle.team) (`postgres` driver), Better Auth DB-session store, server-only data-access layer with Zod-validated inputs and mapped DB errors, Nitro deploy presets (Vercel / Cloudflare / Node.js) |
 
 ## Full-Stack Architecture
 
 The app is organized as three cooperating tiers so each concern stays isolated:
 
-### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8"/></svg> Frontend — what the browser runs
-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8"/></svg> **React 19** components, server-rendered by TanStack Start and hydrated on the client.
-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg> **TanStack Router** file-based routes with fully type-safe params and search state.
-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg> **TanStack Form + Zod** for all forms (basic, multi-step, sheet/dialog, advanced).
-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> **shadcn/ui + Tailwind CSS v4** for the component layer and theming (10+ themes via `tweakcn`).
-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> **TanStack Table** for sortable/filterable/paginated data tables driven by URL search params.
-- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4M7 9l4-4 4 4"/></svg> **Recharts** for the analytics overview; <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M6 12h.01M10 12h.01M14 12h.01M6 16h.01M10 16h.01M14 16h.01"/></svg> **kbar** for the Cmd+K command palette.
+### <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> Frontend — what the browser runs
+- <img src="https://avatars.githubusercontent.com/u/6412038?s=48&v=4" width="16" height="16" align="absmiddle" alt="React" /> **React 19** components, server-rendered by TanStack Start and hydrated on the client.
+- <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> **TanStack Router** file-based routes with fully type-safe params and search state.
+- <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> **TanStack Form + Zod** for all forms (basic, multi-step, sheet/dialog, advanced).
+- <img src="https://avatars.githubusercontent.com/u/139895814?s=48&v=4" width="16" height="16" align="absmiddle" alt="shadcn/ui" /> **shadcn/ui + Tailwind CSS v4** for the component layer and theming (10+ themes via `tweakcn`).
+- <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> **TanStack Table** for sortable/filterable/paginated data tables driven by URL search params.
+- <img src="https://avatars.githubusercontent.com/u/102815355?s=48&v=4" width="16" height="16" align="absmiddle" alt="Recharts" /> **Recharts** for the analytics overview; <img src="https://avatars.githubusercontent.com/u/114124786?s=48&v=4" width="16" height="16" align="absmiddle" alt="kbar" /> **kbar** for the Cmd+K command palette.
 
-### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg> Middle — server runtime & data glue
-- **TanStack Start** (Vite 7 → Nitro) renders on the server and streams HTML. React Query cache is dehydrated into the page and rehydrated on the client via `setupRouterSsrQueryIntegration({ router, queryClient })`.
+### <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> Middle — server runtime & data glue
+- <img src="https://avatars.githubusercontent.com/u/72518640?s=48&v=4" width="16" height="16" align="absmiddle" alt="TanStack" /> **TanStack Start** (Vite 7 → Nitro) renders on the server and streams HTML. React Query cache is dehydrated into the page and rehydrated on the client via `setupRouterSsrQueryIntegration({ router, queryClient })`.
 - **Route `loader`s** call `queryClient.ensureQueryData(...)` with `ssr: 'data-only'`, so data prefetches on the server and the client never refetches on first paint.
 - **`createServerFn()`** is the RPC boundary for all server logic (products, users, kanban, notifications). Every endpoint enforces a valid session (`requireSession()`) or admin role (`requireRole('admin')`) **inside the handler**, so it cannot be reached unauthenticated over HTTP — independent of route guards.
-- **Better Auth** provides the DB-session auth and `admin` plugin for RBAC; the `/api/auth/$` splat route handles all auth requests.
+- <img src="https://avatars.githubusercontent.com/u/139895814?s=48&v=4" width="16" height="16" align="absmiddle" alt="Better Auth" /> **Better Auth** provides the DB-session auth and `admin` plugin for RBAC; the `/api/auth/$` splat route handles all auth requests.
 
-### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg> Backend — data & persistence
-- **PostgreSQL + Drizzle ORM** (`postgres` driver, server-only) is the source of truth for products, users, kanban, and notifications.
+### <img src="https://avatars.githubusercontent.com/u/82585676?s=48&v=4" width="16" height="16" align="absmiddle" alt="PostgreSQL" /> Backend — data & persistence
+- <img src="https://avatars.githubusercontent.com/u/82585676?s=48&v=4" width="16" height="16" align="absmiddle" alt="PostgreSQL" /> **PostgreSQL + Drizzle ORM** (<img src="https://avatars.githubusercontent.com/u/83924520?s=48&v=4" width="16" height="16" align="absmiddle" alt="Drizzle" /> `postgres` driver, server-only) is the source of truth for products, users, kanban, and notifications.
 - **Better Auth schema** (`user`, `session`, `account`, `verification`) lives in the same Drizzle layer.
 - **Server-only data-access modules** (`src/lib/db/`) dynamically `import()` the DB so the driver never reaches the client bundle. Inputs are Zod-validated at runtime; DB errors are mapped to safe messages (no column/constraint leakage).
 - **Nitro** builds the app to any target (Vercel, Cloudflare Pages, Netlify, Node.js server).
@@ -62,7 +62,7 @@ The app is organized as three cooperating tiers so each concern stays isolated:
 - **Command palette** (Cmd+K) for quick navigation
 - **Better Auth** — DB-session auth with an `admin` role plugin, hardened RPC boundary (session + Zod + mapped errors)
 - **Testing** — Vitest unit/integration tests + Playwright E2E tests for product CRUD and table sorting
-- **Deploy anywhere** — Vercel, Cloudflare, Node.js via Nitro presets
+- **Deploy via Nitro presets** — default Bun server build; Vercel/Cloudflare/Netlify configurable
 
 ## Pages
 
@@ -146,8 +146,8 @@ cp env.example.txt .env
 Set up and seed the PostgreSQL database (ensure you have PostgreSQL running locally):
 
 ```bash
-bun run db:migrate  # apply database migrations
-bun run db:seed      # seed products, kanban board, notifications, and a demo admin user
+bun run db:push    # apply the Drizzle schema to the database
+bun run db:seed     # seed products, kanban board, notifications, and a demo admin user
 ```
 
 Run the development server:
@@ -169,17 +169,18 @@ bun run e2e            # Playwright E2E tests (auto-starts dev server)
 
 ## Deploy
 
-### Vercel (Recommended)
+The project builds with **Nitro** using the `bun` preset, producing a standalone Bun server in `.output/`.
 
-The project uses **Nitro** with the `vercel` preset. Just connect your GitHub repo to Vercel:
+### Build & Run (Bun server — default)
 
-- **Build Command:** `bun run build`
-- **Output Directory:** leave blank (auto-detected)
-- **Framework Preset:** Other
+```bash
+bun run build
+bun run start    # serves the built app from .output/server/index.mjs
+```
 
 ### Other Platforms
 
-Change the Nitro preset in `vite.config.ts`:
+To target a different host, change the Nitro preset in `vite.config.ts`:
 
 ```ts
 // Cloudflare Pages
@@ -190,6 +191,9 @@ nitro({ preset: 'node-server' });
 
 // Netlify
 nitro({ preset: 'netlify' });
+
+// Vercel
+nitro({ preset: 'vercel' });
 ```
 
 Then run locally with:
@@ -198,6 +202,8 @@ Then run locally with:
 bun run build
 bun run start
 ```
+
+> **Note:** Vercel/Cloudflare/Netlify presets are supported by Nitro but are not the default build target. The maintained, tested path is the `bun` preset.
 
 ## Security
 
@@ -217,12 +223,6 @@ The server-function RPC boundary is hardened (auth at the boundary, Zod input va
 | Build Tool | Webpack/Turbopack | Vite |
 | Deployment | `next start` | Nitro (any platform) |
 | URL State | nuqs | TanStack Router `useSearch()` + `validateSearch` |
-
-### Support
-
-If you find this template helpful, please consider giving it a star — and if you are deciding between the original and this fork, **we recommend using this one** for the complete backend and test coverage.
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buymeacoffee)](https://buymeacoffee.com/kir4n)
 
 Cheers!
 
