@@ -2,7 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { createServerFn } from '@tanstack/react-start';
+import { createServerOnlyFn } from '@tanstack/react-start';
 
 import { Toaster } from '@/components/ui/sonner';
 import { ActiveThemeProvider } from '@/components/themes/active-theme';
@@ -16,12 +16,11 @@ const META_THEME_COLORS = {
   dark: '#09090b'
 };
 
-const getActiveTheme = createServerFn({ method: 'GET' }).handler(async () => {
+const getActiveTheme = createServerOnlyFn(async () => {
   const { getCookie } = await import('@tanstack/react-start/server');
   const cookieValue = getCookie('active_theme');
-  if (cookieValue) {
-    const isValid = THEMES.some((t) => t.value === cookieValue);
-    if (isValid) return cookieValue;
+  if (cookieValue && THEMES.some((t) => t.value === cookieValue)) {
+    return cookieValue;
   }
   return DEFAULT_THEME;
 });
@@ -37,7 +36,8 @@ export const Route = createRootRouteWithContext<{
       {
         name: 'description',
         content: 'Dashboard with TanStack Start and Shadcn'
-      }
+      },
+      { tag: 'link', rel: 'icon', href: '/tanstack-dashboard.png' }
     ]
   }),
   loader: async () => {

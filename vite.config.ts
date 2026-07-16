@@ -17,6 +17,17 @@ export default defineConfig({
     port: 3000,
     allowedHosts: true
   },
+  // The `postgres` driver (used by server functions) references `Buffer`,
+  // which does not exist in the browser. Polyfill it so client bundles
+  // that transitively include server code don't crash on hydration.
+  define: {
+    global: 'globalThis'
+  },
+  resolve: {
+    alias: {
+      Buffer: 'buffer'
+    }
+  },
   plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact(), ...nitroPlugin],
   test: {
     // Integration tests talk to a dedicated PostgreSQL test database
