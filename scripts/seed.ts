@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { db } from '../src/lib/db';
-import { auth } from '../src/lib/auth/auth';
+import { auth } from '../src/lib/auth/auth.server';
 import { products, kanbanColumns, kanbanTasks, notifications } from '../src/lib/db/schema';
 
 const PRODUCT_CATEGORIES = [

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { auth } from '@/lib/auth/auth';
+import { auth } from '@/lib/auth/auth.server';
 import { mapDbError } from '../errors';
 import type { UserFilters, UsersResponse, UserMutationPayload } from '@/features/users/api/types';
 
