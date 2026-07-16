@@ -233,12 +233,6 @@ If you want the canonical starter, upstream is linked above — but if you want 
 | Deployment | `next start` | Nitro (any platform) |
 | URL State | nuqs | TanStack Router `useSearch()` + `validateSearch` |
 
-### Support
-
-If you find this template helpful, please consider giving it a star — and if you are deciding between the original and this fork, **we recommend using this one** for the complete backend and test coverage.
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buymeacoffee)](https://buymeacoffee.com/kir4n)
-
 Cheers!
 
 ---
