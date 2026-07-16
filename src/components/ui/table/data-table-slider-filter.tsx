@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
+import { FilterClearButton } from '@/components/ui/filter-clear-button';
 import { cn } from '@/lib/utils';
 import { Icons } from '@/components/icons';
 
@@ -121,14 +122,7 @@ export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderF
       <PopoverTrigger asChild>
         <Button variant='outline' size='sm' className='border-dashed'>
           {columnFilterValue ? (
-            <button
-              type='button'
-              aria-label={`Clear ${title} filter`}
-              className='focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none'
-              onClick={onReset}
-            >
-              <Icons.xCircle />
-            </button>
+            <FilterClearButton title={title} onReset={onReset} />
           ) : (
             <Icons.plusCircle />
           )}

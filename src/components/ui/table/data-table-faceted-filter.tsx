@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import { FilterClearButton } from '@/components/ui/filter-clear-button';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
 import { CheckIcon } from '@radix-ui/react-icons';
@@ -74,14 +75,7 @@ export function DataTableFacetedFilter<TData, TValue>({
       <PopoverTrigger asChild>
         <Button variant='outline' size='sm' className='border-dashed'>
           {selectedValues?.size > 0 ? (
-            <button
-              type='button'
-              aria-label={`Clear ${title} filter`}
-              onClick={onReset}
-              className='focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none'
-            >
-              <Icons.xCircle />
-            </button>
+            <FilterClearButton title={title} onReset={onReset} />
           ) : (
             <Icons.plusCircle />
           )}

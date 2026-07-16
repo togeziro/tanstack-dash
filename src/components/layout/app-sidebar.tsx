@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { navGroups } from '@/config/nav-config';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
 import { authClient } from '@/lib/auth/auth-client';
 import { Link } from '@tanstack/react-router';
@@ -33,13 +32,8 @@ import {
 
 export default function AppSidebar() {
   const { pathname } = useLocation();
-  const { isOpen } = useMediaQuery();
   const router = useRouter();
   const filteredGroups = useFilteredNavGroups(navGroups);
-
-  React.useEffect(() => {
-    // Side effects based on sidebar state changes
-  }, [isOpen]);
 
   return (
     <Sidebar variant='inset' collapsible='icon'>

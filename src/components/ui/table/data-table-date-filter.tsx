@@ -5,6 +5,7 @@ import type { DateRange } from 'react-day-picker';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { FilterClearButton } from '@/components/ui/filter-clear-button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { formatDate } from '@/lib/format';
@@ -163,14 +164,7 @@ export function DataTableDateFilter<TData>({
       <PopoverTrigger asChild>
         <Button variant='outline' size='sm' className='border-dashed'>
           {hasValue ? (
-            <button
-              type='button'
-              aria-label={`Clear ${title} filter`}
-              onClick={onReset}
-              className='focus-visible:ring-ring rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:outline-none'
-            >
-              <Icons.xCircle />
-            </button>
+            <FilterClearButton title={title} onReset={onReset} />
           ) : (
             <Icons.calendar />
           )}
