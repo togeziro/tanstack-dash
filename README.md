@@ -3,16 +3,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Kiranism/tanstack-start-dashboard/stargazers"><img src="https://img.shields.io/github/stars/Kiranism/tanstack-start-dashboard?style=social" alt="GitHub stars" /></a>
-  <a href="https://github.com/Kiranism/tanstack-start-dashboard/network/members"><img src="https://img.shields.io/github/forks/Kiranism/tanstack-start-dashboard?style=social" alt="Forks" /></a>
-  <a href="https://github.com/Kiranism/tanstack-start-dashboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
+  <a href="https://github.com/togeziro/tanstack-dash/stargazers"><img src="https://img.shields.io/github/stars/togeziro/tanstack-dash?style=social" alt="GitHub stars" /></a>
+  <a href="https://github.com/togeziro/tanstack-dash/network/members"><img src="https://img.shields.io/github/forks/togeziro/tanstack-dash?style=social" alt="Forks" /></a>
+  <a href="https://github.com/togeziro/tanstack-dash/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
   <img src="https://img.shields.io/badge/TanStack_Start-1.x-FF4154" alt="TanStack Start" />
   <img src="https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white" alt="Vite" />
 </p>
 
 # TanStack Start Admin Dashboard
-
-> **Fork notice:** This repository is a maintained fork of [`Kiranism/tanstack-start-dashboard`](https://github.com/Kiranism/tanstack-start-dashboard). We keep it in sync with upstream improvements while adding our own hardening (auth boundary, DB layer, test coverage) and fixes. **If you are choosing between the two, we recommend using this fork** — it includes the Better Auth + PostgreSQL backend, a hardened server-function RPC boundary, and a working test suite that upstream does not yet ship.
 
 A production-ready **admin dashboard starter** built with **TanStack Start** (React 19 + Vite 7 + Nitro), **shadcn/ui**, **Tailwind CSS v4**, **Better Auth**, and **PostgreSQL (Drizzle ORM)**. It gives you charts, tables, forms, a kanban board, and a notification center behind a type-safe, feature-based codebase — ideal for SaaS apps, internal tools, and admin panels.
 
@@ -28,21 +26,21 @@ A production-ready **admin dashboard starter** built with **TanStack Start** (Re
 
 The app is organized as three cooperating tiers so each concern stays isolated:
 
-### Frontend — what the browser runs
-- **React 19** components, server-rendered by TanStack Start and hydrated on the client.
-- **TanStack Router** file-based routes with fully type-safe params and search state.
-- **TanStack Form + Zod** for all forms (basic, multi-step, sheet/dialog, advanced).
-- **shadcn/ui + Tailwind CSS v4** for the component layer and theming (10+ themes via `tweakcn`).
-- **TanStack Table** for sortable/filterable/paginated data tables driven by URL search params.
-- **Recharts** for the analytics overview; **kbar** for the Cmd+K command palette.
+### 🖥️ Frontend — what the browser runs
+- ⚛️ **React 19** components, server-rendered by TanStack Start and hydrated on the client.
+- 🧭 **TanStack Router** file-based routes with fully type-safe params and search state.
+- 📝 **TanStack Form + Zod** for all forms (basic, multi-step, sheet/dialog, advanced).
+- 🧩 **shadcn/ui + Tailwind CSS v4** for the component layer and theming (10+ themes via `tweakcn`).
+- 📊 **TanStack Table** for sortable/filterable/paginated data tables driven by URL search params.
+- 📈 **Recharts** for the analytics overview; ⌨️ **kbar** for the Cmd+K command palette.
 
-### Middle — server runtime & data glue
+### ⚙️ Middle — server runtime & data glue
 - **TanStack Start** (Vite 7 → Nitro) renders on the server and streams HTML. React Query cache is dehydrated into the page and rehydrated on the client via `setupRouterSsrQueryIntegration({ router, queryClient })`.
 - **Route `loader`s** call `queryClient.ensureQueryData(...)` with `ssr: 'data-only'`, so data prefetches on the server and the client never refetches on first paint.
 - **`createServerFn()`** is the RPC boundary for all server logic (products, users, kanban, notifications). Every endpoint enforces a valid session (`requireSession()`) or admin role (`requireRole('admin')`) **inside the handler**, so it cannot be reached unauthenticated over HTTP — independent of route guards.
 - **Better Auth** provides the DB-session auth and `admin` plugin for RBAC; the `/api/auth/$` splat route handles all auth requests.
 
-### Backend — data & persistence
+### 🗄️ Backend — data & persistence
 - **PostgreSQL + Drizzle ORM** (`postgres` driver, server-only) is the source of truth for products, users, kanban, and notifications.
 - **Better Auth schema** (`user`, `session`, `account`, `verification`) lives in the same Drizzle layer.
 - **Server-only data-access modules** (`src/lib/db/`) dynamically `import()` the DB so the driver never reaches the client bundle. Inputs are Zod-validated at runtime; DB errors are mapped to safe messages (no column/constraint leakage).
@@ -237,7 +235,7 @@ If you want the canonical starter, upstream is linked above — but if you want 
 
 ### Support
 
-If you find this template helpful, please consider giving it a star — and if you are deciding between the original and this fork, **we recommend this one** for the complete backend and test coverage.
+If you find this template helpful, please consider giving it a star — and if you are deciding between the original and this fork, **we recommend using this one** for the complete backend and test coverage.
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat-square&logo=buymeacoffee)](https://buymeacoffee.com/kir4n)
 
