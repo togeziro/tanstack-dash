@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **Codebase cleanup (spaghetti reduction)**: Applied a 10-task refactor across 4 passes (see `docs/superpowers/specs/2026-07-16-spaghetti-cleanup-design.md` and `docs/superpowers/plans/2026-07-16-spaghetti-cleanup.md`):
+  - Extracted shared `AuthShell` (v1 sign-in/sign-up) and `AuthCard` (v2 routes) — removed ~4 duplicated auth layouts.
+  - Deduplicated product Zod schema + category options into the canonical `features/products` sources; fixed a latent lowercase-vs-uppercase category enum bug in the demo forms; dropped an `as any` cast.
+  - Relocated `fetchGitHubRepo`/`formatCount` to `lib/github.ts` and `GitHubIcon` to `icons.tsx`.
+  - Removed dead `useEffect` in `app-sidebar.tsx`; extracted shared `FilterClearButton` from 3 table-filter components; extracted `PasswordField` from auth forms; extracted `parseFilterValuesFromSearch`/`buildFilterSearchParams` from `use-data-table.ts` into `lib/parsers.ts`; split the 755-line `infobar.tsx` into 5 cohesive modules; extracted `ComboboxField`/`TagsField`/`SectionTitle` from `demo-form.tsx`; added `getProductOr404` helper to dedupe the load-row preamble in `db/products.ts`.
+
 - **Auth**: Swapped custom JWT (`bcryptjs`, `jose`) for Better Auth.
   - Added `better-auth` + `@better-auth/drizzle-adapter` deps; removed `bcryptjs`, `jose`, `@types/bcryptjs`.
   - Generated Better Auth schema tables (`user`, `session`, `account`, `verification`).

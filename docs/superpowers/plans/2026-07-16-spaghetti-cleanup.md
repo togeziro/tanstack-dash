@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Status:** ✅ **COMPLETE** — all 10 tasks implemented on `dev`, each reviewed (spec compliance + code quality), final whole-branch review approved merge with no Must-Fix items. Ledger: `.superpowers/sdd/progress.md`.
+
 **Goal:** Reduce maintainability debt by removing duplication, splitting over-large modules, and deleting dead code — no behavior or UI changes.
 
 **Architecture:** 4 independent passes (A–D), each producing a small commit-safe change set. Passes A and B touch auth/product routes; C touches a shared component; D is a catch-all cleanup. Each pass is independently reviewable.
