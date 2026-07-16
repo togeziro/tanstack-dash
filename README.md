@@ -131,8 +131,8 @@ src/
 Clone the repo:
 
 ```bash
-git clone https://github.com/<your-fork>/tanstack-dashboard.git
-cd tanstack-dashboard
+git clone git@github.com:togeziro/tanstack-dash.git
+cd tanstack-dash
 ```
 
 Install dependencies and run:
@@ -203,22 +203,7 @@ bun run start
 
 The server-function RPC boundary is hardened (auth at the boundary, Zod input validation, mapped DB errors). For the full details and the one known gap (notification IDOR — tracked, not yet fixed), see [docs/SECURITY.md](./docs/SECURITY.md).
 
-## Why this fork over upstream
-
-We forked [`Kiranism/tanstack-start-dashboard`](https://github.com/Kiranism/tanstack-start-dashboard) and extended it. Compared to the upstream template, **this fork** adds:
-
-| Area | Upstream (Kiranism) | This fork |
-| ---- | ----------------- | ---------- |
-| Auth | Community template baseline | **Better Auth** with DB sessions + `admin` RBAC plugin |
-| Database | (template default) | **PostgreSQL + Drizzle ORM** with a server-only data layer |
-| RPC boundary | Route guards only | Session + role enforced **inside every `createServerFn`** handler |
-| Input validation | — | Runtime **Zod** validation on every server function |
-| Error handling | — | DB errors mapped to safe messages (no leakage) |
-| Tests | — | **Vitest** unit/integration + **Playwright** E2E suite |
-
-If you want the canonical starter, upstream is linked above — but if you want a backend-complete, hardened, tested dashboard, **use this fork**.
-
-## Key Differences from fork with us (current)
+## Key Differences from upstream (Kiranism fork → ours)
 
 | Concept | Upstream (Next.js roots) | This fork (TanStack Start) |
 | ------- | --------------------------- | ----------------------------- |
