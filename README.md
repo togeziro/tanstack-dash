@@ -182,6 +182,16 @@ bun run test:run       # Vitest unit/integration tests
 bun run e2e            # Playwright E2E tests (auto-starts dev server)
 ```
 
+## Security
+
+The server-function boundary (`createServerFn` in `src/features/<feature>/api/service.ts`) is hardened:
+
+- **Authentication at the boundary** — every endpoint calls `requireSession()` (or `requireRole('admin')` for product/user writes) inside the handler, so endpoints cannot be reached unauthenticated over HTTP — independent of route guards.
+- **Input validation** — every server-function input is validated at runtime with a Zod schema (`src/features/<f>/api/validation.ts`) via `@tanstack/zod-adapter`.
+- **Error mapping** — `lib/db/*.ts` wraps DB calls in `mapDbError` (`src/lib/errors.ts`); unexpected errors become a generic message (no DB internals leak), while intentional `DomainError`s pass through.
+
+> **Known gap (tracked, not yet fixed):** notifications are not owner-scoped — the `notifications` table has no `user_id` column, so any authenticated user can read/mark-read/delete any other user's notifications by id. `requireSession()` prevents *unauthenticated* access but is not *authorization* for per-resource ownership. See `docs/TODO.md`. The kanban board is intentionally shared across all authenticated users by design.
+
 ## Deploy
 
 ### Vercel (Recommended)
