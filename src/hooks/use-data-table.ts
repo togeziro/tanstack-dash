@@ -21,10 +21,14 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import * as React from 'react';
 
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
-import { parseSortingState, serializeSortingState } from '@/lib/parsers';
+import {
+  buildFilterSearchParams,
+  parseFilterValuesFromSearch,
+  parseSortingState,
+  serializeSortingState
+} from '@/lib/parsers';
 import type { ExtendedColumnSort } from '@/types/data-table';
 
-const ARRAY_SEPARATOR = ',';
 const DEBOUNCE_MS = 300;
 
 interface UseDataTableProps<TData>
@@ -150,44 +154,14 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   }, [columns, enableAdvancedFilter]);
 
   // Read filter values from search params
-  const filterValues = React.useMemo(() => {
-    if (enableAdvancedFilter) return {};
-    const values: Record<string, string | string[] | null> = {};
-    for (const column of filterableColumns) {
-      const key = column.id ?? '';
-      const val = search[key];
-      if (val !== undefined && val !== null) {
-        if (column.meta?.options) {
-          // Array filter - stored as comma-separated string
-          values[key] = typeof val === 'string' ? val.split(ARRAY_SEPARATOR) : null;
-        } else {
-          values[key] = typeof val === 'string' ? val : null;
-        }
-      } else {
-        values[key] = null;
-      }
-    }
-    return values;
-  }, [search, filterableColumns, enableAdvancedFilter]);
+  const filterValues = React.useMemo(
+    () => (enableAdvancedFilter ? {} : parseFilterValuesFromSearch(search, filterableColumns)),
+    [search, filterableColumns, enableAdvancedFilter]
+  );
 
   const debouncedSetFilterValues = useDebouncedCallback(
     (values: Record<string, string | string[] | null>) => {
-      void navigate({
-        search: (prev: Record<string, unknown>) => {
-          const next: Record<string, unknown> = { ...prev, page: 1 };
-          for (const [key, value] of Object.entries(values)) {
-            if (value === null || value === undefined) {
-              delete next[key];
-            } else if (Array.isArray(value)) {
-              next[key] = value.join(ARRAY_SEPARATOR);
-            } else {
-              next[key] = value;
-            }
-          }
-          return next;
-        },
-        replace: history === 'replace'
-      });
+      void navigate({ search: buildFilterSearchParams(values), replace: history === 'replace' });
     },
     debounceMs
   );
