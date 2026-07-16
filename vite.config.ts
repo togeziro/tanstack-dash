@@ -28,7 +28,19 @@ export default defineConfig({
       Buffer: 'buffer'
     }
   },
-  plugins: [tsconfigPaths(), tailwindcss(), tanstackStart(), viteReact(), ...nitroPlugin],
+  plugins: [
+    tsconfigPaths(),
+    tailwindcss(),
+    tanstackStart({
+      importProtection: {
+        client: {
+          specifiers: ['postgres', 'pg-native', 'pg']
+        }
+      }
+    }),
+    viteReact(),
+    ...nitroPlugin
+  ],
   test: {
     // Integration tests talk to a dedicated PostgreSQL test database
     // (see scripts/create-test-db.ts). Never point this at the dev DB.
