@@ -26,21 +26,21 @@ A production-ready **admin dashboard starter** built with **TanStack Start** (Re
 
 The app is organized as three cooperating tiers so each concern stays isolated:
 
-### 🖥️ Frontend — what the browser runs
-- ⚛️ **React 19** components, server-rendered by TanStack Start and hydrated on the client.
-- 🧭 **TanStack Router** file-based routes with fully type-safe params and search state.
-- 📝 **TanStack Form + Zod** for all forms (basic, multi-step, sheet/dialog, advanced).
-- 🧩 **shadcn/ui + Tailwind CSS v4** for the component layer and theming (10+ themes via `tweakcn`).
-- 📊 **TanStack Table** for sortable/filterable/paginated data tables driven by URL search params.
-- 📈 **Recharts** for the analytics overview; ⌨️ **kbar** for the Cmd+K command palette.
+### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8"/></svg> Frontend — what the browser runs
+- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8"/></svg> **React 19** components, server-rendered by TanStack Start and hydrated on the client.
+- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg> **TanStack Router** file-based routes with fully type-safe params and search state.
+- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg> **TanStack Form + Zod** for all forms (basic, multi-step, sheet/dialog, advanced).
+- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> **shadcn/ui + Tailwind CSS v4** for the component layer and theming (10+ themes via `tweakcn`).
+- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg> **TanStack Table** for sortable/filterable/paginated data tables driven by URL search params.
+- <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4M7 9l4-4 4 4"/></svg> **Recharts** for the analytics overview; <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M6 12h.01M10 12h.01M14 12h.01M6 16h.01M10 16h.01M14 16h.01"/></svg> **kbar** for the Cmd+K command palette.
 
-### ⚙️ Middle — server runtime & data glue
+### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg> Middle — server runtime & data glue
 - **TanStack Start** (Vite 7 → Nitro) renders on the server and streams HTML. React Query cache is dehydrated into the page and rehydrated on the client via `setupRouterSsrQueryIntegration({ router, queryClient })`.
 - **Route `loader`s** call `queryClient.ensureQueryData(...)` with `ssr: 'data-only'`, so data prefetches on the server and the client never refetches on first paint.
 - **`createServerFn()`** is the RPC boundary for all server logic (products, users, kanban, notifications). Every endpoint enforces a valid session (`requireSession()`) or admin role (`requireRole('admin')`) **inside the handler**, so it cannot be reached unauthenticated over HTTP — independent of route guards.
 - **Better Auth** provides the DB-session auth and `admin` plugin for RBAC; the `/api/auth/$` splat route handles all auth requests.
 
-### 🗄️ Backend — data & persistence
+### <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" align="absmiddle"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg> Backend — data & persistence
 - **PostgreSQL + Drizzle ORM** (`postgres` driver, server-only) is the source of truth for products, users, kanban, and notifications.
 - **Better Auth schema** (`user`, `session`, `account`, `verification`) lives in the same Drizzle layer.
 - **Server-only data-access modules** (`src/lib/db/`) dynamically `import()` the DB so the driver never reaches the client bundle. Inputs are Zod-validated at runtime; DB errors are mapped to safe messages (no column/constraint leakage).
