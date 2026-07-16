@@ -71,6 +71,14 @@ function serialize(row: typeof products.$inferSelect) {
   };
 }
 
+async function getProductOr404(id: number) {
+  const [product] = await db.select().from(products).where(eq(products.id, id));
+  if (!product) {
+    return null;
+  }
+  return product;
+}
+
 export async function getProducts(filters: ProductFilters): Promise<ProductsResponse> {
   try {
     const page = Math.max(1, Math.floor(filters.page ?? 1));
@@ -179,7 +187,7 @@ export async function createProduct(data: ProductMutationPayload) {
 
 export async function updateProduct(id: number, data: ProductMutationPayload) {
   try {
-    const [existing] = await db.select().from(products).where(eq(products.id, id));
+    const existing = await getProductOr404(id);
     if (!existing) {
       return { success: false, message: `Product with ID ${id} not found` };
     }
@@ -208,7 +216,7 @@ export async function updateProduct(id: number, data: ProductMutationPayload) {
 
 export async function deleteProduct(id: number) {
   try {
-    const [existing] = await db.select().from(products).where(eq(products.id, id));
+    const existing = await getProductOr404(id);
     if (!existing) {
       return { success: false, message: `Product with ID ${id} not found` };
     }
