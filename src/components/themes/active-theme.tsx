@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 import { DEFAULT_THEME } from './theme.config';
+import { loadFontsForTheme } from '@/lib/fonts';
 
 const COOKIE_NAME = 'active_theme';
 
@@ -51,6 +52,10 @@ export function ActiveThemeProvider({
       // Still update cookie in case it's missing
       setThemeCookie(activeTheme);
     }
+  }, [activeTheme]);
+
+  useEffect(() => {
+    loadFontsForTheme(activeTheme);
   }, [activeTheme]);
 
   return (
