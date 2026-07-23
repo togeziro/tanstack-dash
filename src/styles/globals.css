@@ -8,9 +8,10 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/dm-sans';
 @import '@fontsource-variable/outfit';
-@import '@fontsource-variable/playfair-display';
 @import '@fontsource-variable/fira-code';
 @import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource/architects-daughter';
+@import '@fontsource/space-mono';
 
 @custom-variant dark (&:is(.dark *));
 

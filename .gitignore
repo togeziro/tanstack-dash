@@ -58,3 +58,7 @@ graphify-out/
 # Machine-local tooling artifacts
 .mimocode/
 .tanstack/tmp/
+
+# Only track README.md; other root .md files are project documentation
+*.md
+!README.md

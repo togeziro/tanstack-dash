@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { db } from './index';
 import { DomainError, mapDbError } from '../errors';
 import { notifications } from './schema/notifications';
@@ -24,32 +24,36 @@ function toNotification(row: typeof notifications.$inferSelect): NotificationRow
   };
 }
 
-export async function getNotifications(): Promise<NotificationRow[]> {
+export async function getNotifications(userId: string): Promise<NotificationRow[]> {
   try {
-    const rows = await db.select().from(notifications).orderBy(desc(notifications.created_at));
+    const rows = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.user_id, userId))
+      .orderBy(desc(notifications.created_at));
     return rows.map(toNotification);
   } catch (e) {
     mapDbError(e, 'notifications.getNotifications');
   }
 }
 
-export async function markAsRead(id: number) {
+export async function markAsRead(id: number, userId: string) {
   try {
     await db
       .update(notifications)
       .set({ status: 'read', updated_at: new Date() })
-      .where(eq(notifications.id, id));
+      .where(and(eq(notifications.id, id), eq(notifications.user_id, userId)));
   } catch (e) {
     mapDbError(e, 'notifications.markAsRead');
   }
 }
 
-export async function markAllAsRead() {
+export async function markAllAsRead(userId: string) {
   try {
     await db
       .update(notifications)
       .set({ status: 'read', updated_at: new Date() })
-      .where(eq(notifications.status, 'unread'));
+      .where(and(eq(notifications.status, 'unread'), eq(notifications.user_id, userId)));
   } catch (e) {
     mapDbError(e, 'notifications.markAllAsRead');
   }
@@ -58,6 +62,7 @@ export async function markAllAsRead() {
 export async function addNotification(data: {
   title: string;
   body: string;
+  userId: string;
   actions?: NotificationAction[];
 }) {
   try {
@@ -66,6 +71,7 @@ export async function addNotification(data: {
       .values({
         title: data.title,
         body: data.body,
+        user_id: data.userId,
         actions: data.actions ?? null
       })
       .returning();
@@ -80,9 +86,11 @@ export async function addNotification(data: {
   }
 }
 
-export async function removeNotification(id: number) {
+export async function removeNotification(id: number, userId: string) {
   try {
-    await db.delete(notifications).where(eq(notifications.id, id));
+    await db
+      .delete(notifications)
+      .where(and(eq(notifications.id, id), eq(notifications.user_id, userId)));
   } catch (e) {
     mapDbError(e, 'notifications.removeNotification');
   }

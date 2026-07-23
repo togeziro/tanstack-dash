@@ -1,6 +1,11 @@
 # AGENTS.md — TanStack Dashboard
 
-Agent-facing quick reference. Full project documentation lives in [`docs/`](./docs).
+Agent-facing quick reference. Full project documentation:
+- [PRD.md](./PRD.md) — Product requirements, features, security, roadmap
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — Tech stack, data flow, patterns
+- [API.md](./API.md) — Server function & auth reference
+- [CHANGELOG.md](./CHANGELOG.md) — Notable changes
+- [TODO.md](./TODO.md) — Task tracking
 
 ## Quick start
 
@@ -14,19 +19,15 @@ bun run build      # client + server bundles
 bun run start      # run built app from .output/
 ```
 
-All `bun run` scripts (lint, format, typecheck, db:\*) are defined in `package.json`.
+All `bun run` scripts (lint, format, typecheck, db:*) are defined in `package.json`.
 
-## Documentation
+<!-- CODEGRAPH_START -->
+## CodeGraph
 
-Detailed, current docs live in `docs/`:
+In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
 
-| File                          | Covers                                                                     |
-| ----------------------------- | -------------------------------------------------------------------------- |
-| `docs/ARCHITECTURE.md`        | Tech stack, data flow, directory structure, key patterns                   |
-| `docs/STACK.md`               | Every dependency with versions                                             |
-| `docs/API.md`                 | `createServerFn()` server-function endpoints                               |
-| `docs/FEATURES.md`            | Implemented vs planned features                                            |
-| `docs/TODO.md`                | Project roadmap and progress                                               |
-| `docs/CHANGELOG.md`           | Notable changes (Unreleased and released)                                  |
-| `docs/PRD.md`                 | Product requirements                                                       |
-| `docs/IMPLEMENTATION_PLAN.md` | Locked execution plan: Better Auth swap, Docker/CI, email, infra hardening |
+- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
+- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
+
+If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+<!-- CODEGRAPH_END -->

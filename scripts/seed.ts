@@ -2,6 +2,8 @@ import { faker } from '@faker-js/faker';
 import { db } from '../src/lib/db';
 import { auth } from '../src/lib/auth/auth.server';
 import { products, kanbanColumns, kanbanTasks, notifications } from '../src/lib/db/schema';
+import { user } from '../src/lib/db/auth-schema';
+import { eq } from 'drizzle-orm';
 
 const PRODUCT_CATEGORIES = [
   'Electronics',
@@ -70,21 +72,23 @@ async function seedUsers() {
     password: 'Password123!'
   };
   try {
-    await (auth.api as any).createUser({
+    const created: any = await (auth.api as any).createUser({
       body: { email: demo.email, name: demo.name, password: demo.password, role: 'admin' }
     });
     console.log(`Seeded demo user ${demo.email}`);
+    return created.id as string;
   } catch (err: any) {
     const msg = (err?.message ?? '').toLowerCase();
     if (msg.includes('already exists')) {
       console.log(`Demo user ${demo.email} already exists (skipped)`);
-    } else {
-      throw err;
+      const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, demo.email)).limit(1);
+      return existing?.id;
     }
+    throw err;
   }
 }
 
-async function seedNotifications() {
+async function seedNotifications(userId: string) {
   await db.delete(notifications);
 
   const notificationTemplates = [
@@ -101,20 +105,21 @@ async function seedNotifications() {
   const rows = notificationTemplates.map((t, i) => ({
     title: t.title,
     body: t.body,
+    user_id: userId,
     status: i < 6 ? 'unread' as const : 'read' as const,
     actions: [{ id: t.actionId, label: t.actionLabel, type: 'redirect' as const, style: 'primary' as const }]
   }));
 
   await db.insert(notifications).values(rows);
-  console.log(`Seeded ${rows.length} notifications`);
+  console.log(`Seeded ${rows.length} notifications for user ${userId}`);
 }
 
 async function main() {
   faker.seed(42);
   await seedProducts();
   await seedKanban();
-  await seedNotifications();
-  await seedUsers();
+  const userId = await seedUsers();
+  await seedNotifications(userId);
   console.log('Seed complete');
   process.exit(0);
 }

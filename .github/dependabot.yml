@@ -35,4 +35,16 @@ updates:
       faker:
         patterns: ['@faker-js/*']
       tooling:
-        patterns: ['cmdk', 'date-fns', 'class-variance-authority', 'clsx', 'input-otp', 'jsdom', 'react-day-picker', 'react-dropzone', 'motion', '@tabler/icons-react']
+        patterns:
+          [
+            'cmdk',
+            'date-fns',
+            'class-variance-authority',
+            'clsx',
+            'input-otp',
+            'jsdom',
+            'react-day-picker',
+            'react-dropzone',
+            'motion',
+            '@tabler/icons-react'
+          ]

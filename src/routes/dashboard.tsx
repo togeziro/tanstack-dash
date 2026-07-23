@@ -12,7 +12,7 @@ export const Route = createFileRoute('/dashboard')({
     try {
       await ensureSession();
     } catch {
-      throw redirect({ to: '/auth/sign-in' });
+      throw redirect({ to: '/auth/v2/sign-in' });
     }
   },
   head: () => ({

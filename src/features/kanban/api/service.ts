@@ -11,7 +11,7 @@ export const getBoardFn = createServerFn({ method: 'GET' }).handler(async () => 
 });
 
 export const addTaskFn = createServerFn({ method: 'POST' })
-  .validator(addTaskSchema)
+  .validator(zodValidator(addTaskSchema))
   .handler(async ({ data }: { data: AddTaskPayload }) => {
     await requireSession();
     const { addTask } = await import('@/lib/db/kanban');
@@ -19,7 +19,7 @@ export const addTaskFn = createServerFn({ method: 'POST' })
   });
 
 export const moveTaskFn = createServerFn({ method: 'POST' })
-  .validator(moveTaskSchema)
+  .validator(zodValidator(moveTaskSchema))
   .handler(async ({ data }: { data: MoveTaskPayload }) => {
     await requireSession();
     const { moveTask } = await import('@/lib/db/kanban');

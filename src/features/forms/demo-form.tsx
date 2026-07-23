@@ -31,7 +31,7 @@ import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { ComboboxField, TagsField, SectionTitle } from './fields';
+import { ComboboxField, TagsField, SectionTitle } from '@/components/forms/fields';
 
 // Schema (form-level safety net — onSubmit catches anything field-level missed)
 const demoFormSchema = z.object({

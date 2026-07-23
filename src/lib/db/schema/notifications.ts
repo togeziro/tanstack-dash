@@ -9,6 +9,7 @@ export const notifications = pgTable('notifications', {
   body: text('body').notNull(),
   status: notificationStatusEnum('status').notNull().default('unread'),
   actions: jsonb('actions').$type<NotificationAction[]>(),
+  user_id: text('user_id'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull()
 });

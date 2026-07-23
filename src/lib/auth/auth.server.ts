@@ -9,7 +9,8 @@ export const auth = betterAuth({
     ? process.env.BETTER_AUTH_URL
     : {
         allowedHosts: ['localhost:*', '127.0.0.1:*', '172.17.16.3:*'],
-        protocol: 'auto'
+        protocol: 'auto',
+        fallback: 'http://localhost:3000'
       },
   database: drizzleAdapter(db, {
     provider: 'pg'
