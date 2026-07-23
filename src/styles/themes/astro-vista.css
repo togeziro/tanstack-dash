@@ -32,7 +32,7 @@
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
   --sidebar-ring: oklch(0.6397 0.172 36.4421);
   --font-sans: var(--font-outfit), sans-serif;
-  --font-serif: var(--font-merriweather), serif;
+  --font-serif: Georgia, serif;
   --font-mono: var(--font-fira-code), monospace;
   --radius: 0.5rem;
   --shadow-x: 0px;
@@ -87,7 +87,7 @@
   --sidebar-border: oklch(0.329 0 0);
   --sidebar-ring: oklch(0.6397 0.172 36.4421);
   --font-sans: var(--font-outfit), sans-serif;
-  --font-serif: var(--font-merriweather), serif;
+  --font-serif: Georgia, serif;
   --font-mono: var(--font-fira-code), monospace;
   --radius: 0.5rem;
   --shadow-x: 0px;
